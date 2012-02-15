@@ -1,0 +1,5 @@
+- maybe log unused configuration keys as warnings
+- annotations for default values
+- mapping methods to paths: cfg.fs_module_name() => "fs.module.name = Foo"
+  Parse path from method name (`_' as node delimiter) or
+  use annotations: @ConfigPath("/fs/module/name") moduleName();

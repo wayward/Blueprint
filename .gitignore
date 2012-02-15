@@ -1,0 +1,9 @@
+# Common fluff
+*~
+
+# Compiled classes, artifacts, etc.
+target/
+
+# IDE files
+.idea/
+blueprint.iml
