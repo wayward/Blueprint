@@ -16,9 +16,21 @@
 
 package com.codemined.blueprint.impl;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
+ * A string-decorated tree of objects of type {@code T}.
+ * <p>
+ * A particular object stored in the tree can be fetched using the 
+ * sequence of string decorations starting from the current tree root.
+ * The sequence is specified by the string list constructed with 
+ * {@link Path}.
+ * 
+ * @param <T> The type of the objects contained in a tree.
  * @author Zoran Rilak
  */
 public abstract class NamedTree<T> implements Iterable<NamedTree<T>> {
@@ -27,29 +39,35 @@ public abstract class NamedTree<T> implements Iterable<NamedTree<T>> {
   private final HashMap<String, NamedTree<T>> children;
 
 
-  public class Path {
+  /** Lisp-style list of string atoms, specified by the head atom and a tail list */
+  private static class Path {
     private final String car;
     private final Path cdr;
 
 
-    public Path(String car, Path cdr) {
+    private Path(String car, Path cdr) {
       this.car = car;
       this.cdr = cdr;
     }
 
 
+    /** Returns the head of the list */
     public String car() {
       return car;
     }
 
 
+    /** Returns the tail of the list, or {@code null} if one does not exist. */
     public Path cdr() {
       return cdr;
     }
-
   }
 
 
+  /**
+   * @param value {@code null} value denotes an empty tail, i.e. 
+   * the end of the list
+   */
   protected NamedTree(String name, T value) {
     this.name = name;
     this.value = value;
@@ -67,18 +85,33 @@ public abstract class NamedTree<T> implements Iterable<NamedTree<T>> {
   }
 
 
+  /** 
+   * Adds a child node into {@code this} tree. 
+   * 
+   * @return {@code true} if the added child replaced an already 
+   * existing child; {@code false} otherwise.
+   */
   public boolean addChild(NamedTree<T> child) {
-    return (children.put(child.name, child) != null);
+    NamedTree<T> oldValue = children.put(child.name, child);
+    return oldValue != null;
   }
 
 
+  /**
+   * Gets the subtree of {@code this}, starting from {@code path}.
+   * 
+   * @param path the path from {@code this} to fetch; may be {@code null}
+   * @return the subtree as specified by {@code path}; returns self for a null path
+   * @throws NoSuchElementException if the path specified doesn't
+   *     exist in this tree.
+   */
   public NamedTree<T> getTree(Path path) {
     if (path == null) {
       return this;
     }
-    NamedTree<T> t;
-    if ((t = children.get(path.car())) == null) {
-      throw new NoSuchElementException();
+    NamedTree<T> t = children.get(path.car());
+    if (t == null) {
+      throw new NoSuchElementException(String.format("In path: %s", path));
     }
     return t.getTree(path.cdr());
   }

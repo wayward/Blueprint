@@ -17,19 +17,14 @@
 package com.codemined.blueprint.impl;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author Zoran Rilak
  */
 public abstract class ConfigurationTree extends NamedTree<String> {
 
-
   public ConfigurationTree(String value, List<ConfigurationTree> children) {
     super(null, value);
-    Properties p = new Properties();
-
-    Integer i = Integer.valueOf("sdf");
     for (ConfigurationTree c : children) {
       addChild(c);
     }
