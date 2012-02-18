@@ -23,25 +23,22 @@ import org.apache.commons.configuration.Configuration;
 import java.util.*;
 
 /**
+ * A configuration source backed by the Apache configuration reader.
+ * 
  * @author Zoran Rilak
  * @version 0.1
  * @since 0.1
  */
 public class ApacheConfigurationSource implements Source {
-  private CompositeConfiguration configuration;
+  private final Configuration configuration;
 
 
   public ApacheConfigurationSource(Configuration... configurations) {
-    this.configuration = new CompositeConfiguration();
+    CompositeConfiguration config = new CompositeConfiguration();
     for (Configuration c : configurations) {
-      this.configuration.addConfiguration(c);
+      config.addConfiguration(c);
     }
-  }
-
-
-  public ApacheConfigurationSource with(Configuration newConfiguration) {
-    this.configuration.addConfiguration(newConfiguration);
-    return this;
+    this.configuration = config;
   }
 
 
@@ -100,9 +97,9 @@ public class ApacheConfigurationSource implements Source {
           // trim leading root path and the `.' after it
           key = key.substring(path.length() + 1);
           // trim any trailing components after the first one
-          final int i = key.indexOf('.');
-          if (i >= 0) {
-            key = key.substring(0, i);
+          int dotPosition = key.indexOf('.');
+          if (dotPosition >= 0) {
+            key = key.substring(0, dotPosition);
           }
           if (seenComponents.contains(key)) {
             nextComponent = null;
@@ -116,8 +113,9 @@ public class ApacheConfigurationSource implements Source {
 
       @Override
       public String next() {
-        if (! hasNext()) {
-          throw new NoSuchElementException();
+        if (!hasNext()) {
+          throw new NoSuchElementException(
+              String.format("For path: %s, last: %s", path, nextComponent));
         }
         String s = nextComponent;
         nextComponent = null;

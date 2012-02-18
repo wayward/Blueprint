@@ -31,22 +31,36 @@ package com.codemined.blueprint;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
- * - Implements common fluff from Object(): toString(), equals(), hashCode(), ...
- * - Scans Interface for contained interfaces and methods
- * - Sub-interfaces are processed by creating and caching proxy classes
- * - Methods are processed thus:
- *   - Simple return type (Integer, Boolean...) is passed on to the deserializer
- *   - Sub-interface return type creates/reuses a child instance of BlueprintStub
- *   - Collection return type
- * - Weak references will be used for caching large values, especially if we allow
- *   for polymorphic deserialization: <T> T url(Class<T> deserializeAs)
- * >>> Check how Guice, Jersey and Jackson capture generic types.
+ * Binds values from the configuration to the given interface's methods. 
+ * <p>
+ * 
+ * <ul>
+ *   <li>Implements common fluff from Object(): toString(), equals(), hashCode(), ...
+ *   <li> Scans Interface for contained interfaces and methods
+ *   <li>Sub-interfaces are processed by creating and caching proxy classes
+ *   <li>Methods are processed thus:
+ *     <ul>
+ *       <li>Simple return type (Integer, Boolean...) is passed on to the deserializer
+ *       <li>Sub-interface return type creates/reuses a child instance of BlueprintStub
+ *       <li>Collection return type
+ *     </ul>
+ *   <li>Weak references will be used for caching large values, especially if we allow
+ *       for polymorphic deserialization: {@code <T> T url(Class<T> deserializeAs)}.
+ * </ul>
+ * TODO(Zoran Rilak) Check how Jersey and Jackson capture generic types.
+ * <p>
+ * Guice uses a generic type {@code TypeLiteral<T>} to capture generic types.  So instead of
+ * passing {@code List<SomeType>.class}, which isn't legal Java, you pass:
+ * {@code new TypeLiteral<List<SomeType>>() {}}.
  *
+ * @param <I> the interface type to proxy
+ * 
  * @author Zoran Rilak
  * @version 0.1
  * @since 0.1
@@ -61,15 +75,19 @@ class Stub<I> implements InvocationHandler {
 
 
   public Stub(Class<I> iface, Source source, String prefix) {
-    this.iface = iface;
-    this.source = source;
-    this.deserializer = new Deserializer(source, iface.getClassLoader());
-    this.prefix = prefix;
-    this.cache = Collections.synchronizedMap(new WeakHashMap<MethodInvocation, Object>());
-    this.proxy = createProxy();
+    this(iface, source, prefix, new Deserializer(source, iface.getClassLoader()));
   }
 
+  // @VisibleForTesting
+  Stub(Class<I> iface, Source source, String prefix, Deserializer deserializer) {
+    this.iface = iface;
+    this.source = source;
+    this.deserializer = deserializer;
+    this.prefix = prefix;
+    this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
+    this.proxy = createProxy();
 
+  }
   public I getProxy() {
     return proxy;
   }
@@ -77,23 +95,19 @@ class Stub<I> implements InvocationHandler {
   /* Methods from InvocationHandler --------------------------------- */
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] args)
-          throws Throwable {
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     // route methods not declared on the blueprint interface to self
     if (method.getDeclaringClass() == Object.class) {
       return method.invoke(this, args);
     }
 
     // Values are cached by (method, args) pairs to support type hinting in arguments.
-    final String key = source.composePath(prefix, method.getName());
+    String key = source.composePath(prefix, method.getName());
     try {
-      final MethodInvocation invocation = new MethodInvocation(method, args);
-      Object o;
-      if ((o = cache.get(invocation)) == null) {
-        o = deserializer.deserialize(
-                invocation.getReturnType(),
-                invocation.getHintedType(),
-                key);
+      MethodInvocation invocation = new MethodInvocation(method, args);
+      Object o = cache.get(invocation);
+      if (o == null) {
+        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key);
         cache.put(invocation, o);
       }
       return o;
@@ -142,23 +156,12 @@ class Stub<I> implements InvocationHandler {
   }
 
 
-  private String buildExceptionMessage(String cause, String key, Method method, Object[] args) {
-    final StringBuilder sb = new StringBuilder(cause);
-    sb.append(", in class ").append(iface.getName());
-    sb.append(", method ").append(method.getName()).append('(');
-    if (args != null && args.length > 0) {
-      int commas = args.length - 1;
-      for (Object arg : args) {
-        sb.append(arg.getClass().getCanonicalName());
-        if (commas > 0) {
-          sb.append(", ");
-          commas--;
-        }
-      }
-    }
-    sb.append(')');
-    sb.append(", key \"").append(key).append('"');
-    return sb.toString();
+  private String buildExceptionMessage(String cause, String key, Method method, Object... args) {
+    return String.format(
+      "%s, in class %s, method %s%s, key '%s'", 
+          cause, iface.getName(), method.getName(), Arrays.asList(args), key);
+    // OK, so it'll be printing 'method methodName[arg1, arg2]' instead of
+    // 'method methodName(arg1, arg2)'.  Who cares?
   }
 
 }

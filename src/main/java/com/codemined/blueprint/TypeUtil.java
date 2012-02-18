@@ -20,14 +20,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Programmatic boxing of primitive types.
+ * 
  * @author Zoran Rilak
  */
 class TypeUtil {
-  private static final Map<Class, Class> primitiveTable;
+  private static final Map<Class<?>, Class<?>> primitiveTable;
 
 
   static {
-    primitiveTable = new HashMap<Class, Class>();
+    primitiveTable = new HashMap<Class<?>, Class<?>>();
     primitiveTable.put(byte.class, Byte.class);
     primitiveTable.put(short.class, Short.class);
     primitiveTable.put(int.class, Integer.class);
@@ -39,6 +41,10 @@ class TypeUtil {
   }
 
 
+  /** Boxes a primitive type, else passes it unchanged.
+   * 
+   *  @param type may be null
+   */
   public static <T> Class<T> deprimitivize(Class<?> type) {
     if (type == null) {
       return null;
@@ -46,7 +52,9 @@ class TypeUtil {
     if (type.isPrimitive()) {
       type = primitiveTable.get(type);
     }
-    return (Class<T>) type;
+    @SuppressWarnings("unchecked")  // it came from the primitives table, it must be typesafe.
+    Class<T> returnType = (Class<T>) type;
+    return returnType;
   }
 
 }
