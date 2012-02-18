@@ -59,6 +59,8 @@ import java.util.Map;
  * passing {@code List<SomeType>.class}, which isn't legal Java, you pass:
  * {@code new TypeLiteral<List<SomeType>>() {}}.
  *
+ * @param <I> the interface type to proxy
+ * 
  * @author Zoran Rilak
  * @version 0.1
  * @since 0.1
@@ -73,15 +75,19 @@ class Stub<I> implements InvocationHandler {
 
 
   public Stub(Class<I> iface, Source source, String prefix) {
+    this(iface, source, prefix, new Deserializer(source, iface.getClassLoader()));
+  }
+
+  // @VisibleForTesting
+  Stub(Class<I> iface, Source source, String prefix, Deserializer deserializer) {
     this.iface = iface;
     this.source = source;
-    this.deserializer = new Deserializer(source, iface.getClassLoader());
+    this.deserializer = deserializer;
     this.prefix = prefix;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
     this.proxy = createProxy();
+
   }
-
-
   public I getProxy() {
     return proxy;
   }
@@ -89,15 +95,14 @@ class Stub<I> implements InvocationHandler {
   /* Methods from InvocationHandler --------------------------------- */
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] args)
-          throws Throwable {
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     // route methods not declared on the blueprint interface to self
     if (method.getDeclaringClass() == Object.class) {
       return method.invoke(this, args);
     }
 
     // Values are cached by (method, args) pairs to support type hinting in arguments.
-    final String key = source.composePath(prefix, method.getName());
+    String key = source.composePath(prefix, method.getName());
     try {
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
