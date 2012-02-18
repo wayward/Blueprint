@@ -46,7 +46,8 @@ class Deserializer {
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(Class<T> returnType, Class hintedType, String key) {
+  public <T> T deserialize(
+        Class<T> returnType, @SuppressWarnings("rawtypes") Class hintedType, String key) {
 
     /* Maps and collections require type hint to determine the element type. */
 
