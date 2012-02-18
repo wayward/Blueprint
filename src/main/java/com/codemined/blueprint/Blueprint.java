@@ -27,21 +27,30 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
+ * Creates a blueprint file from a configuration source.
+ * 
  * @author Zoran Rilak
  */
 public class Blueprint {
   private static MethodValidator validator = Validation
-          .byProvider(HibernateValidator.class)
-          .configure()
-          .buildValidatorFactory()
-          .getValidator()
-          .unwrap(MethodValidator.class);
+      .byProvider(HibernateValidator.class)
+      .configure()
+      .buildValidatorFactory()
+      .getValidator()
+      .unwrap(MethodValidator.class);
 
 
+  /**
+   * @param iface the interface for configuration access.
+   * @param source the source to get the configuration from
+   * @return an object of {@code iface}, stubbed to return reified values from the configuration. 
+   * @throws InvalidConfigurationException in case of errors
+   */
   public static <T> T createBlueprint(Class<T> iface, Source source)
           throws InvalidConfigurationException {
-    if (! iface.isInterface()) {
-      throw new IllegalArgumentException("Blueprints must be constructed from interfaces.");
+    if (!iface.isInterface()) {
+      throw new IllegalArgumentException(
+        "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
     }
     
     Stub<T> stub = new Stub<T>(iface, source, null);
@@ -54,9 +63,9 @@ public class Blueprint {
   /* Privates ------------------------------------------------------- */
 
 
-  private static <T> void validate(Class<T> iface, T blueprint)
-          throws InvalidConfigurationException {
-    final LinkedList<String> failedValidations = new LinkedList<String>();
+  private static <T> void validate(Class<T> iface, T blueprint) 
+      throws InvalidConfigurationException {
+    LinkedList<String> failedValidations = new LinkedList<String>();
 
     try {
       // Scan for methods declared on the blueprint interface,
@@ -69,9 +78,9 @@ public class Blueprint {
 
         if (method.getDeclaringClass().equals(blueprint.getClass()) &&
                 method.getParameterTypes().length == 0) {
-          final Object returnValue = method.invoke(blueprint);
-          final Set<MethodConstraintViolation<T>> violations =
-                  validator.validateReturnValue(blueprint, method, returnValue);
+          Object returnValue = method.invoke(blueprint);
+          Set<MethodConstraintViolation<T>> violations =
+              validator.validateReturnValue(blueprint, method, returnValue);
           for (MethodConstraintViolation<T> violation : violations) {
             failedValidations.add(violation.getMessage());
           }
@@ -84,14 +93,18 @@ public class Blueprint {
       }
 
     } catch (InvocationTargetException e) {
-      throw new BlueprintException(e);
-
+        throw fromException(e, iface, blueprint);
     } catch (NoSuchMethodException e) {
-      throw new BlueprintException(e);
-
+        throw fromException(e, iface, blueprint);
     } catch (IllegalAccessException e) {
-      throw new BlueprintException(e);
+      throw fromException(e, iface, blueprint);
     }
   }
 
+  
+  private static <T> BlueprintException fromException(
+      Exception thrown, Class<T> iface, T blueprint) throws BlueprintException {
+    throw new BlueprintException(
+        String.format("For iface='%s', blueprint='%s'", iface, blueprint), thrown);
+  }
 }
