@@ -28,12 +28,7 @@ import java.util.Iterator;
  */
 public interface Source {
 
-  /**
-   * Null components are silently ignored.
-   *
-   * @param component
-   * @return
-   */
+  /** Null components are silently ignored. */
   String composePath(String... component);
 
   String getString(String path);
