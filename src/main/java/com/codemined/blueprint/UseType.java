@@ -16,10 +16,16 @@
 
 package com.codemined.blueprint;
 
-import java.lang.annotation.*;
 import static java.lang.annotation.ElementType.METHOD;
 
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
+ * Annotated type validation.
+ *  
  * @author Zoran Rilak
  */
 @Target(METHOD)
@@ -27,6 +33,10 @@ import static java.lang.annotation.ElementType.METHOD;
 @Inherited
 public @interface UseType {
 
+  /** 
+   * When a method is annotated with a value here, Blueprint will expect the reified type
+   * to match this type.
+   */
   public Class<?> value();
 
 }

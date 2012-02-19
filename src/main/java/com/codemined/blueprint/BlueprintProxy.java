@@ -17,6 +17,8 @@
 package com.codemined.blueprint;
 
 /**
+ * All instances of objects created by Blueprint always implement this interface.
+ * 
  * @author Zoran Rilak
  * @version 0.1
  * @since 0.1
