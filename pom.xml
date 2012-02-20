@@ -20,7 +20,7 @@
 
     <groupId>com.codemined</groupId>
     <artifactId>blueprint</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>blueprint</name>
