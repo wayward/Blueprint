@@ -16,9 +16,9 @@
 
 package org.codemined.blueprint;
 
-import com.codemined.blueprint.impl.ApacheConfigurationSource;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.codemined.blueprint.impl.ApacheConfigurationSource;
 import org.testng.annotations.Test;
 
 import java.io.File;

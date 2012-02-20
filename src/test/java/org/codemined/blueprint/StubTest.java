@@ -1,16 +1,12 @@
 package org.codemined.blueprint;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.classextension.EasyMock.createControl;
-import static org.testng.Assert.assertEquals;
-
-import org.codemined.blueprint.Deserializer;
-import org.codemined.blueprint.Source;
-import org.codemined.blueprint.Stub;
-import org.codemined.blueprint.UseType;
 import org.easymock.classextension.IMocksControl;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import static org.easymock.EasyMock.expect;
+import static org.easymock.classextension.EasyMock.createControl;
+import static org.testng.Assert.assertEquals;
 
 @Test
 public class StubTest {

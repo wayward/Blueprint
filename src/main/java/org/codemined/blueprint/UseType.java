@@ -16,12 +16,12 @@
 
 package org.codemined.blueprint;
 
-import static java.lang.annotation.ElementType.METHOD;
-
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.METHOD;
 
 /**
  * Annotated type validation.
