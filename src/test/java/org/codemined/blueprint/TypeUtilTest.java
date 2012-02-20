@@ -1,4 +1,4 @@
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import static org.testng.Assert.assertEquals;
 

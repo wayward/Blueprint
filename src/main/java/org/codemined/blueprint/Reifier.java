@@ -14,29 +14,32 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
-import static java.lang.annotation.ElementType.METHOD;
-
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.*;
 
 /**
- * Annotated type validation.
- *  
  * @author Zoran Rilak
  */
-@Target(METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface UseType {
+public class Reifier {
 
-  /** 
-   * When a method is annotated with a value here, Blueprint will expect the reified type
-   * to match this type.
-   */
-  public Class<?> value();
+  public static <E> Collection<E> reifyCollection(Class<?> type) {
+    if (! type.isInterface()) {
+      throw new BlueprintException("Only interfaces can be reified");
+    }
+
+    if (type.isAssignableFrom(LinkedList.class)) {
+      return new LinkedList<E>();
+    }
+    if (type.isAssignableFrom(TreeSet.class)) {
+      return new TreeSet<E>();
+    }
+
+    throw new BlueprintException("Don't know how to reify " + type);
+  }
+
+  public static <E> Map<String, E> reifyStringMap() {
+    return new HashMap<String, E>();
+  }
 
 }

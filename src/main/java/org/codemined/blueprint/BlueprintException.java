@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
-
-import java.util.*;
+package org.codemined.blueprint;
 
 /**
  * @author Zoran Rilak
  */
-public class Reifier {
+public class BlueprintException extends RuntimeException {
 
-  public static <E> Collection<E> reifyCollection(Class<?> type) {
-    if (! type.isInterface()) {
-      throw new BlueprintException("Only interfaces can be reified");
-    }
-
-    if (type.isAssignableFrom(LinkedList.class)) {
-      return new LinkedList<E>();
-    }
-    if (type.isAssignableFrom(TreeSet.class)) {
-      return new TreeSet<E>();
-    }
-
-    throw new BlueprintException("Don't know how to reify " + type);
+  public BlueprintException() {
+    super();
   }
 
-  public static <E> Map<String, E> reifyStringMap() {
-    return new HashMap<String, E>();
+  public BlueprintException(String message) {
+    super(message);
+  }
+
+  public BlueprintException(Throwable cause) {
+    super(cause);
+  }
+
+  public BlueprintException(String message, Throwable cause) {
+    super(message, cause);
   }
 
 }

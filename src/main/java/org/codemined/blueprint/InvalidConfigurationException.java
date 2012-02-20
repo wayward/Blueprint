@@ -14,7 +14,24 @@
  * limitations under the License.
  */
 
+package org.codemined.blueprint;
+
+import java.util.List;
+
 /**
- * @since 1.0
+ * @author Zoran Rilak
  */
-package com.codemined.blueprint.impl;
+public class InvalidConfigurationException extends Exception {
+  private final List<String> failedValidations;
+
+  public InvalidConfigurationException(String message, List<String> failedValidations) {
+    super(message);
+    this.failedValidations = failedValidations;
+  }
+
+
+  public List<String> getFailedValidations() {
+    return failedValidations;
+  }
+
+}

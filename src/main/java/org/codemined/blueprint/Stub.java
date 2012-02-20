@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
   /* Stub(Interface, ConfigurationSource) or
      Stub(Interface, Prefix)

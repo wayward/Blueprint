@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
-
-import java.util.Collection;
-import java.util.Iterator;
+package org.codemined.blueprint;
 
 /**
- * Configuration source.  It behaves like a tree, which it is.
- *
+ * All instances of objects created by Blueprint always implement this interface.
+ * 
  * @author Zoran Rilak
  * @version 0.1
  * @since 0.1
  */
-public interface Source {
-
-  /** Null components are silently ignored. */
-  String composePath(String... component);
-
-  String getString(String path);
-
-  Collection<String> getCollection(String path);
-
-  /**
-   * Returns an iterator over the sub-components of a path.
-   *
-   * @param path
-   * @return
-   */
-  Iterator<String> getSubComponents(String path);
+interface BlueprintProxy {
 
 }

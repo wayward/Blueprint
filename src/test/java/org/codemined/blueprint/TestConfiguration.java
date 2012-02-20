@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

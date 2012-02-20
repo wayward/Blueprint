@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import com.codemined.blueprint.impl.ApacheConfigurationSource;
 import org.apache.commons.configuration.ConfigurationException;

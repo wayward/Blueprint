@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint.impl;
+package org.codemined.blueprint.impl;
 
-import com.codemined.blueprint.Source;
+import org.codemined.blueprint.Source;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 

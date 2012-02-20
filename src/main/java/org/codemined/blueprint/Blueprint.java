@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.method.MethodConstraintViolation;

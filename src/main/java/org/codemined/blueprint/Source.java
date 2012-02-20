@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
+ * Configuration source.  It behaves like a tree, which it is.
+ *
  * @author Zoran Rilak
+ * @version 0.1
+ * @since 0.1
  */
-public class BlueprintException extends RuntimeException {
+public interface Source {
 
-  public BlueprintException() {
-    super();
-  }
+  /** Null components are silently ignored. */
+  String composePath(String... component);
 
-  public BlueprintException(String message) {
-    super(message);
-  }
+  String getString(String path);
 
-  public BlueprintException(Throwable cause) {
-    super(cause);
-  }
+  Collection<String> getCollection(String path);
 
-  public BlueprintException(String message, Throwable cause) {
-    super(message, cause);
-  }
+  /**
+   * Returns an iterator over the sub-components of a path.
+   *
+   * @param path
+   * @return
+   */
+  Iterator<String> getSubComponents(String path);
 
 }

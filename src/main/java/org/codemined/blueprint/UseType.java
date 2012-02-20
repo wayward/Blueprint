@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
-import java.util.List;
+import static java.lang.annotation.ElementType.METHOD;
+
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
+ * Annotated type validation.
+ *  
  * @author Zoran Rilak
  */
-public class InvalidConfigurationException extends Exception {
-  private final List<String> failedValidations;
+@Target(METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface UseType {
 
-  public InvalidConfigurationException(String message, List<String> failedValidations) {
-    super(message);
-    this.failedValidations = failedValidations;
-  }
-
-
-  public List<String> getFailedValidations() {
-    return failedValidations;
-  }
+  /** 
+   * When a method is annotated with a value here, Blueprint will expect the reified type
+   * to match this type.
+   */
+  public Class<?> value();
 
 }

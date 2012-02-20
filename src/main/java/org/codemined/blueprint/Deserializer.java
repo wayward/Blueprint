@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.codemined.blueprint;
+package org.codemined.blueprint;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
