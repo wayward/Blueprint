@@ -28,11 +28,13 @@ import java.util.NoSuchElementException;
  * @author Zoran Rilak
  */
 class Deserializer {
+  // keep `valueOf' last so that we can circumvent this
+  // very common static method with a custom one from those above it
   private static final String[] STATIC_DESERIALIZER_METHODS = {
-          "valueOf",
-          "parse",
           "fromString",
-          "deserialize"
+          "parse",
+          "deserialize",
+          "valueOf"
   };
 
   private final Source source;
