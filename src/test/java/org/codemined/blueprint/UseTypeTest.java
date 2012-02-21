@@ -8,12 +8,12 @@ import org.testng.annotations.Test;
 public class UseTypeTest {
 
   private interface Iface {
-    @UseType(UseTypeTest.class) void someMethod();
+    @UseType(UseTypeTest.class) void aMethod();
   }
   
   public void someTest() {
     Assert.assertNotNull(new Iface() {
-      @Override public void someMethod() {
+      @Override public void aMethod() {
         // no-op
       }});
   }

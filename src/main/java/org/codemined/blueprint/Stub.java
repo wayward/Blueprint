@@ -38,8 +38,7 @@ import java.util.Map;
 
 /**
  * Binds values from the configuration to the given interface's methods. 
- * <p>
- * 
+ *
  * <ul>
  *   <li>Implements common fluff from Object(): toString(), equals(), hashCode(), ...
  *   <li> Scans Interface for contained interfaces and methods
@@ -53,11 +52,6 @@ import java.util.Map;
  *   <li>Weak references will be used for caching large values, especially if we allow
  *       for polymorphic deserialization: {@code <T> T url(Class<T> deserializeAs)}.
  * </ul>
- * TODO(Zoran Rilak) Check how Jersey and Jackson capture generic types.
- * <p>
- * Guice uses a generic type {@code TypeLiteral<T>} to capture generic types.  So instead of
- * passing {@code List<SomeType>.class}, which isn't legal Java, you pass:
- * {@code new TypeLiteral<List<SomeType>>() {}}.
  *
  * @param <I> the interface type to proxy
  * 
@@ -102,18 +96,23 @@ class Stub<I> implements InvocationHandler {
     }
 
     // Values are cached by (method, args) pairs to support type hinting in arguments.
-    String key = source.composePath(prefix, method.getName());
+    String key = method.getName();
+    Key keyAnn = method.getAnnotation(Key.class);
+    if (keyAnn != null) {
+      key = keyAnn.value();
+    }
+    String path = source.composePath(prefix, key);
     try {
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
       if (o == null) {
-        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key);
+        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), path);
         cache.put(invocation, o);
       }
       return o;
       
     } catch (BlueprintException e) {
-      throw new BlueprintException(buildExceptionMessage(e.getMessage(), key, method, args), e);
+      throw new BlueprintException(buildExceptionMessage(e.getMessage(), path, method, args), e);
     }
   }
 
@@ -157,11 +156,12 @@ class Stub<I> implements InvocationHandler {
 
 
   private String buildExceptionMessage(String cause, String key, Method method, Object... args) {
-    return String.format(
-      "%s, in class %s, method %s%s, key '%s'", 
-          cause, iface.getName(), method.getName(), Arrays.asList(args), key);
-    // OK, so it'll be printing 'method methodName[arg1, arg2]' instead of
-    // 'method methodName(arg1, arg2)'.  Who cares?
+    return String.format("%s, in class %s, method %s%s, key '%s'",
+            cause,
+            iface.getName(),
+            method.getName(),
+            args == null ? "[]" : Arrays.asList(args),
+            key);
   }
 
 }

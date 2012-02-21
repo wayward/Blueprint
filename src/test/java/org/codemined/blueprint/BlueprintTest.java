@@ -148,4 +148,10 @@ public class BlueprintTest {
     assertSame(cfg.db().impl(Class.class), java.util.Random.class);
   }
 
+  public void overridingKeys() {
+    TestConfiguration cfg = createTestBlueprint();
+    assertTrue(cfg.key1());
+    assertTrue(cfg.keyTwo());
+  }
+
 }

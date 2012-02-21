@@ -143,4 +143,9 @@ public interface TestConfiguration {
     }
   }
 
+  boolean key1();
+
+  @Key("key2")
+  boolean keyTwo();
+
 }

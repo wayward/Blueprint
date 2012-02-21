@@ -46,8 +46,7 @@ class Deserializer {
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(
-        Class<T> returnType, @SuppressWarnings("rawtypes") Class hintedType, String key) {
+  public <T> T deserialize(Class<T> returnType, @SuppressWarnings("rawtypes") Class hintedType, String key) {
 
     /* Maps and collections require type hint to determine the element type. */
 
@@ -78,7 +77,7 @@ class Deserializer {
       }
     }
 
-    if (Modifier.isInterface(returnType.getModifiers())) {
+    if (returnType.isInterface()) {
       return deserializeInterface(returnType, key);
     }
 

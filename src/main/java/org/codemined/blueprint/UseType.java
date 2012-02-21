@@ -16,21 +16,17 @@
 
 package org.codemined.blueprint;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
+import java.lang.annotation.*;
 
 /**
  * Annotated type validation.
  *  
  * @author Zoran Rilak
  */
-@Target(METHOD)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+@Documented
 public @interface UseType {
 
   /** 
