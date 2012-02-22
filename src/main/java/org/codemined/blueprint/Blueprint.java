@@ -52,9 +52,11 @@ public class Blueprint {
       throw new IllegalArgumentException(
         "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
     }
-    
-    Stub<T> stub = new Stub<T>(iface, source, null);
-    T blueprint = stub.getProxy();
+
+    final Deserializer deserializer = new Deserializer(null, source, iface.getClassLoader());
+    final Stub<T> stub = new Stub<T>(iface, deserializer);
+    final T blueprint = stub.getProxy();
+
     validate(iface, blueprint);
     return blueprint;
   }
@@ -68,19 +70,17 @@ public class Blueprint {
     LinkedList<String> failedValidations = new LinkedList<String>();
 
     try {
-      // Scan for methods declared on the blueprint interface,
-      // invoke their equivalents on the blueprint proxy and
-      // establish whether the values returned satisfy the constraints.
-      // Note that we're currently ignoring methods with return type hints.
       for (Method ifaceMethod : iface.getMethods()) {
-        Method method = blueprint.getClass()
-                .getMethod(ifaceMethod.getName(), ifaceMethod.getParameterTypes());
-
+        Method method = blueprint.getClass().getMethod(
+                ifaceMethod.getName(),
+                ifaceMethod.getParameterTypes());
+        // skip methods with type hints as optional parameters (complicated to figure out the proper call)
         if (method.getDeclaringClass().equals(blueprint.getClass()) &&
                 method.getParameterTypes().length == 0) {
           Object returnValue = method.invoke(blueprint);
-          Set<MethodConstraintViolation<T>> violations =
-              validator.validateReturnValue(blueprint, method, returnValue);
+
+          final Set<MethodConstraintViolation<T>> violations =
+                  validator.validateReturnValue(blueprint, method, returnValue);
           for (MethodConstraintViolation<T> violation : violations) {
             failedValidations.add(violation.getMessage());
           }
@@ -93,18 +93,23 @@ public class Blueprint {
       }
 
     } catch (InvocationTargetException e) {
-        throw fromException(e, iface, blueprint);
+      if (e.getCause() instanceof RuntimeException) {
+        throw (RuntimeException) e.getCause();
+      } else {
+        throw new RuntimeException("Uncaught checked exception!  " +
+                "This might indicate a bug in Blueprint.");
+      }
+
+      // all other exceptions indicate bugs in Blueprint and/or JVM.
     } catch (NoSuchMethodException e) {
-        throw fromException(e, iface, blueprint);
+      throw fromException(iface, e);
     } catch (IllegalAccessException e) {
-      throw fromException(e, iface, blueprint);
+      throw fromException(iface, e);
     }
   }
 
-  
-  private static <T> BlueprintException fromException(
-      Exception thrown, Class<T> iface, T blueprint) throws BlueprintException {
-    throw new BlueprintException(
-        String.format("For iface='%s', blueprint='%s'", iface, blueprint), thrown);
+  private static <T> RuntimeException fromException(Class<T> iface, Throwable cause) {
+    return new RuntimeException(String.format("For interface %s", iface), cause);
   }
+
 }

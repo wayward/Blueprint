@@ -61,27 +61,18 @@ import java.util.Map;
  */
 class Stub<I> implements InvocationHandler {
   private final Class<I> iface;
-  private final Source source;
   private final Deserializer deserializer;
-  private final String prefix;
   private final Map<MethodInvocation, Object> cache;
   private final I proxy;
 
 
-  public Stub(Class<I> iface, Source source, String prefix) {
-    this(iface, source, prefix, new Deserializer(source, iface.getClassLoader()));
-  }
-
-  // @VisibleForTesting
-  Stub(Class<I> iface, Source source, String prefix, Deserializer deserializer) {
+  public Stub(Class<I> iface, Deserializer deserializer) {
     this.iface = iface;
-    this.source = source;
     this.deserializer = deserializer;
-    this.prefix = prefix;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
     this.proxy = createProxy();
-
   }
+
   public I getProxy() {
     return proxy;
   }
@@ -101,18 +92,17 @@ class Stub<I> implements InvocationHandler {
     if (keyAnn != null) {
       key = keyAnn.value();
     }
-    String path = source.composePath(prefix, key);
     try {
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
       if (o == null) {
-        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), path);
+        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key);
         cache.put(invocation, o);
       }
       return o;
       
     } catch (BlueprintException e) {
-      throw new BlueprintException(buildExceptionMessage(e.getMessage(), path, method, args), e);
+      throw new BlueprintException(buildExceptionMessage(e.getMessage(), method, args), e);
     }
   }
 
@@ -129,7 +119,7 @@ class Stub<I> implements InvocationHandler {
   @Override
   public int hashCode() {
     int result = iface != null ? iface.hashCode() : 0;
-    result = 31 * result + (source != null ? source.hashCode() : 0);
+    result = 31 * result + (deserializer != null ? deserializer.hashCode() : 0);
     return result;
   }
 
@@ -155,13 +145,12 @@ class Stub<I> implements InvocationHandler {
   }
 
 
-  private String buildExceptionMessage(String cause, String key, Method method, Object... args) {
-    return String.format("%s, in class %s, method %s%s, key '%s'",
+  private String buildExceptionMessage(String cause, Method method, Object... args) {
+    return String.format("%s, in class %s, method %s%s",
             cause,
             iface.getName(),
             method.getName(),
-            args == null ? "[]" : Arrays.asList(args),
-            key);
+            args == null ? "[]" : Arrays.asList(args));
   }
 
 }

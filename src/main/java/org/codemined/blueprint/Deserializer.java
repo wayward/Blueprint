@@ -28,8 +28,9 @@ import java.util.NoSuchElementException;
  * @author Zoran Rilak
  */
 class Deserializer {
-  // keep `valueOf' last so that we can circumvent this
-  // very common static method with a custom one from those above it
+  // keep `valueOf' last so that we can circumvent this very common
+  // static method with a custom one from among those above it.
+  // Very useful for e.g. case-insensitive deserialization of enums.
   private static final String[] STATIC_DESERIALIZER_METHODS = {
           "fromString",
           "parse",
@@ -37,11 +38,13 @@ class Deserializer {
           "valueOf"
   };
 
+  private final String prefix;
   private final Source source;
   private final ClassLoader classLoader;
 
 
-  public Deserializer(Source source, ClassLoader classLoader) {
+  public Deserializer(String prefix, Source source, ClassLoader classLoader) {
+    this.prefix = prefix;
     this.source = source;
     this.classLoader = classLoader;
   }
@@ -52,18 +55,20 @@ class Deserializer {
 
     /* Maps and collections require type hint to determine the element type. */
 
+    final String path = source.composePath(prefix, key);
+
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a type hint");
       }
-      return (T) deserializeMap(hintedType, key);
+      return (T) deserializeMap(hintedType, path);
     }
 
     if (Collection.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Collections require a type hint");
       }
-      return (T) deserializeCollection(returnType, hintedType, key);
+      return (T) deserializeCollection(returnType, hintedType, path);
     }
 
     /* Other (non-map, non-collection) return types will be superseded by the
@@ -80,16 +85,16 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      return deserializeInterface(returnType, key);
+      return deserializeInterface(returnType, path);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
-      return deserializeClass(key);
+      return deserializeClass(path);
     }
 
     // else try to deserialize as a simple type (through a static factory method or ctor)
     // if a type hint is present, try to downcast it to the actual return type
-    return deserializeSimpleType(returnType, source.getString(key));
+    return deserializeSimpleType(returnType, path);
   }
 
 
@@ -119,14 +124,16 @@ class Deserializer {
     final Collection<E> targetCollection = Reifier.reifyCollection(type);
 
     for (String v : values) {
-      targetCollection.add(deserializeSimpleType(elementType, v));
+      targetCollection.add(deserializeSimpleTypeFromValue(elementType, v));
     }
     return targetCollection;
   }
 
 
-  private <T> T deserializeInterface(Class<T> type, String key) {
-    return new Stub<T>(type, source, key).getProxy();
+  private <T> T deserializeInterface(Class<T> type, String path) {
+    // TODO will need a better way to determine the classloader to use for child deserializers
+    final Deserializer childDeserializer = new Deserializer(path, source, type.getClassLoader());
+    return new Stub<T>(type, childDeserializer).getProxy();
   }
 
 
@@ -145,14 +152,20 @@ class Deserializer {
   }
 
 
-  private <T> T deserializeSimpleType(Class<T> type, String value) {
+  private <T> T deserializeSimpleType(Class<T> type, String path) {
+    return deserializeSimpleTypeFromValue(type, source.getString(path));
+  }
+
+  private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {
     T o;
     for (String methodName : STATIC_DESERIALIZER_METHODS) {
-      if ((o = useStaticDeserializer(type, methodName, value)) != null) {
+      o = useStaticDeserializer(type, methodName, value);
+      if (o  != null) {
         return o;
       }
     }
-    if ((o = useConstructorDeserializer(type, value)) != null) {
+    o = useConstructorDeserializer(type, value);
+    if (o != null) {
       return o;
     }
 
@@ -160,8 +173,7 @@ class Deserializer {
             " for type " + type.getName());
   }
 
-
-  private static <T> T useStaticDeserializer(Class<T> type, String methodName, String value) {
+  private <T> T useStaticDeserializer(Class<T> type, String methodName, String value) {
     try {
       Method method = type.getMethod(methodName, String.class);
       if (Modifier.isStatic(method.getModifiers()) &&
@@ -180,7 +192,7 @@ class Deserializer {
   }
 
 
-  private static <T> T useConstructorDeserializer(Class<T> type, String value) {
+  private <T> T useConstructorDeserializer(Class<T> type, String value) {
     try {
       Constructor<T> ctor = type.getConstructor(String.class);
       return ctor.newInstance(value);
