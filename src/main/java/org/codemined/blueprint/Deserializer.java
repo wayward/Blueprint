@@ -55,20 +55,18 @@ class Deserializer {
 
     /* Maps and collections require type hint to determine the element type. */
 
-    final String path = source.composePath(prefix, key);
-
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a type hint");
       }
-      return (T) deserializeMap(hintedType, path);
+      return (T) deserializeMap(hintedType, key);
     }
 
     if (Collection.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Collections require a type hint");
       }
-      return (T) deserializeCollection(returnType, hintedType, path);
+      return (T) deserializeCollection(returnType, hintedType, key);
     }
 
     /* Other (non-map, non-collection) return types will be superseded by the
@@ -85,35 +83,35 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      return deserializeInterface(returnType, path);
+      return deserializeInterface(returnType, key);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
-      return deserializeClass(path);
+      return deserializeClass(key);
     }
 
     // else try to deserialize as a simple type (through a static factory method or ctor)
     // if a type hint is present, try to downcast it to the actual return type
-    return deserializeSimpleType(returnType, path);
+    return deserializeSimpleType(returnType, key);
   }
 
 
   /**
    *
    * @param elementType
-   * @param rootPath
+   * @param key
    * @param <E>
    * @return
    */
-  public <E> Map<String, E> deserializeMap(Class<E> elementType, String rootPath) {
-    final Iterator<String> iter = source.getSubComponents(rootPath);
+  public <E> Map<String, E> deserializeMap(Class<E> elementType, String key) {
+    final String path = source.composePath(prefix, key);
+    final Iterator<String> iter = source.getSubComponents(path);
     final Map<String, E> targetMap = Reifier.reifyStringMap();
 
     while (iter.hasNext()) {
-      final String component = iter.next();
-      final String path = source.composePath(rootPath, component);
-      final E element = deserialize(elementType, null, path);
-      targetMap.put(component, element);
+      final String subKey = iter.next();
+      final E element = deserialize(elementType, null, source.composePath(key, subKey));
+      targetMap.put(subKey, element);
     }
     return targetMap;
   }
@@ -130,8 +128,9 @@ class Deserializer {
   }
 
 
-  private <T> T deserializeInterface(Class<T> type, String path) {
+  private <T> T deserializeInterface(Class<T> type, String key) {
     // TODO will need a better way to determine the classloader to use for child deserializers
+    final String path = source.composePath(prefix, key);
     final Deserializer childDeserializer = new Deserializer(path, source, type.getClassLoader());
     return new Stub<T>(type, childDeserializer).getProxy();
   }
@@ -144,15 +143,17 @@ class Deserializer {
    */
   @SuppressWarnings("unchecked")
   private <T> T deserializeClass(String key) {
+    final String path = source.composePath(prefix, key);
     try {
-      return (T) classLoader.loadClass(source.getString(key));
+      return (T) classLoader.loadClass(source.getString(path));
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
   }
 
 
-  private <T> T deserializeSimpleType(Class<T> type, String path) {
+  private <T> T deserializeSimpleType(Class<T> type, String key) {
+    final String path = source.composePath(prefix, key);
     return deserializeSimpleTypeFromValue(type, source.getString(path));
   }
 
@@ -207,4 +208,3 @@ class Deserializer {
   }
 
 }
-

@@ -87,11 +87,7 @@ class Stub<I> implements InvocationHandler {
     }
 
     // Values are cached by (method, args) pairs to support type hinting in arguments.
-    String key = method.getName();
-    Key keyAnn = method.getAnnotation(Key.class);
-    if (keyAnn != null) {
-      key = keyAnn.value();
-    }
+    final String key = getKeyFor(method);
     try {
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
@@ -144,6 +140,13 @@ class Stub<I> implements InvocationHandler {
     }
   }
 
+  private String getKeyFor(Method method) {
+    Key keyAnn = method.getAnnotation(Key.class);
+    if (keyAnn != null) {
+      return keyAnn.value();
+    }
+    return method.getName();
+  }
 
   private String buildExceptionMessage(String cause, Method method, Object... args) {
     return String.format("%s, in class %s, method %s%s",
