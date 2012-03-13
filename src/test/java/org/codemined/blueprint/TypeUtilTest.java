@@ -1,8 +1,8 @@
 package org.codemined.blueprint;
 
-import static org.testng.Assert.assertEquals;
-
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 @Test
 public class TypeUtilTest {
@@ -22,4 +22,5 @@ public class TypeUtilTest {
   public void testNonPrimitive() {
     assertEquals(String.class, TypeUtil.deprimitivize(String.class));
   }
+
 }

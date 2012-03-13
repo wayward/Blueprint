@@ -83,6 +83,7 @@ public interface TestConfiguration {
   @UseType(_Protocol.class)
   Map<String, _Protocol> protocols();
   interface _Protocol {
+    String $value();
     String name();
     int port();
   }

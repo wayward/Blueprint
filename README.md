@@ -14,7 +14,7 @@ Configuration files are a common mainstay of many Java applications.  Some stand
   - JSON;
   - etc.
 
-All of these and many other formats are generally well-suited for a structured representation of key-value pairs where keys are paths composed of strings, and values are of whatever type our application expects them to be.  However, the common problem you encounter no matter which file format and parsing library you choose is that the values read from the configuration come as plain String objects.  Consider the following code one might write in order to read an integer from a configuration file:
+All of these and many other formats are generally awell-suited for a structured representation of key-value pairs where keys are paths composed of strings, and values are of whatever type our application expects them to be.  However, the common problem you encounter no matter which file format and parsing library you choose is that the values read from the configuration come as plain String objects.  Consider the following code one might write in order to read an integer from a configuration file:
 
     Properties props = new Properties();
     props.load(new FileReader("conf/server.properties"));

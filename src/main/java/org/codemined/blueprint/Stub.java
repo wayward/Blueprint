@@ -16,17 +16,15 @@
 
 package org.codemined.blueprint;
 
-  /* Stub(Interface, ConfigurationSource) or
-     Stub(Interface, Prefix)
-     ================================================================
-     - Interface: class that this Stub will be proxying for
-     - ConfigurationSource: source to query for configuration key-value pairs
-     - RootPath: ConfigurationSource-specific "root path" for this stub to map onto
-     - Stub implements some common behaviors and caches/generates the rest.
-     - Stub caching strategy might be configurable if we allow the configurations to change
-       (but keep validations in mind: do we re-run them, and if so, when?)
-
-   */
+/* Stub(Interface, ConfigurationSource) or
+   Stub(Interface, Prefix)
+ ================================================================
+ - Interface: class that this Stub will be proxying for
+ - ConfigurationSource: source to query for configuration key-value pairs
+ - RootPath: ConfigurationSource-specific "root path" for this stub to map onto
+ - Stub implements some common behaviors and caches/generates the rest.
+ - Stub caching strategy might be configurable if we allow the configurations to change
+   (but keep validations in mind: do we re-run them, and if so, when?) */
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -53,6 +51,14 @@ import java.util.Map;
  *       for polymorphic deserialization: {@code <T> T url(Class<T> deserializeAs)}.
  * </ul>
  *
+ * <p>
+ *   Two additional methods are provided:
+ *   <ul>
+ *     <li>$value(): returns the deserialized value from the root configuration key;</li>
+ *     <li>$asMap(): returns a map of all sub-keys and their deserialized values.</li>
+ *   </ul>
+ * </p>
+ *
  * @param <I> the interface type to proxy
  * 
  * @author Zoran Rilak
@@ -60,11 +66,12 @@ import java.util.Map;
  * @since 0.1
  */
 class Stub<I> implements InvocationHandler {
+  private final String VALUE_METHOD_NAME = "$value";
+  private final String COLLECT_METHOD_NAME = "$asMap";
   private final Class<I> iface;
   private final Deserializer deserializer;
   private final Map<MethodInvocation, Object> cache;
   private final I proxy;
-
 
   public Stub(Class<I> iface, Deserializer deserializer) {
     this.iface = iface;
@@ -102,15 +109,12 @@ class Stub<I> implements InvocationHandler {
     }
   }
 
-
   /* Methods from Object -------------------------------------------- */
-
 
   @Override
   public boolean equals(Object o) {
     return proxy == o;
   }
-
 
   @Override
   public int hashCode() {
@@ -119,15 +123,12 @@ class Stub<I> implements InvocationHandler {
     return result;
   }
 
-  
   @Override
   public String toString() {
     return "[" + iface.getName() + " blueprint]";
   }
 
-
   /* Privates ------------------------------------------------------- */
-
 
   private I createProxy() {
     try {
@@ -141,6 +142,10 @@ class Stub<I> implements InvocationHandler {
   }
 
   private String getKeyFor(Method method) {
+    // handle special methods
+    if (VALUE_METHOD_NAME.equals(method.getName())) {
+      return null;
+    }
     Key keyAnn = method.getAnnotation(Key.class);
     if (keyAnn != null) {
       return keyAnn.value();

@@ -27,14 +27,22 @@ import java.util.Arrays;
  * @since 0.1
  */
 class MethodInvocation {
+
+  private static final Object[] NO_ARGS = new Object[] {};
+
+  /* Java reflection object representing the method being called. */
   private final Method method;
+
+  /* A (potentially empty) array of arguments passed to the method when called. */
   private final Object[] args;
+
   private final Class<?> returnType;
+
   private final Class<?> hintedType;
 
   public MethodInvocation(Method method, Object[] args) {
     this.method = method;
-    this.args = args;
+    this.args = unwrapRuntimeArguments(args);
     this.returnType = TypeUtil.deprimitivize(method.getReturnType());
     this.hintedType = TypeUtil.deprimitivize(getHintedType0());
   }
@@ -50,7 +58,44 @@ class MethodInvocation {
   }
 
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MethodInvocation other = (MethodInvocation) o;
+    return (method == null ? other.method == null : method.equals(other.method)) &&
+            Arrays.equals(args, other.args);
+  }
+
+
+  @Override
+  public int hashCode() {
+    int result = method != null ? method.hashCode() : 0;
+    result = 31 * result + (args != null ? Arrays.hashCode(args) : 0);
+    return result;
+  }
+
+
   /* Privates ------------------------------------------------------- */
+
+  private Object[] unwrapRuntimeArguments(Object[] args) {
+    /* promote a null argument list into an empty array */
+    if (args == null) {
+      return NO_ARGS;
+    }
+    /* unwrap single vararg array */
+    if (args[0] instanceof Class[] && args.length == 1) {
+      args = (Object[]) args[0];
+    }
+    /* ensure that the blueprint method call semantic has been observed */
+    if (args.length > 1) {
+      throw new BlueprintException("Blueprint methods may only take one optional type hint argument");
+    }
+    if (args.length == 1 && !(args[0] instanceof Class)) {
+      throw new BlueprintException("Optional type hint argument must be an instance of Class");
+    }
+    return args;
+  }
 
 
   private Class<?> getHintedType0() {
@@ -79,15 +124,6 @@ class MethodInvocation {
 
 
   private Class<?> getRuntimeTypeHint0() {
-    Object[] args = this.args;
-
-    if (args == null) {
-      return null;
-    }
-    // unwrap single vararg array before continuing
-    if (args[0] instanceof Class[] && args.length == 1) {
-      args = (Object[]) args[0];
-    }
     switch (args.length) {
       case 0:
         return null;
@@ -97,26 +133,9 @@ class MethodInvocation {
         }
         return (Class<?>) args[0];
       default:
-        throw new BlueprintException("Item methods may only take one optional type hint argument.");
+        throw new BlueprintException("Blueprint methods may only take one optional type hint argument");
     }
   }
 
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    MethodInvocation other = (MethodInvocation) o;
-    return (method == null ? other.method == null : method.equals(other.method)) &&
-            Arrays.equals(args, other.args);
-  }
-
-
-  @Override
-  public int hashCode() {
-    int result = method != null ? method.hashCode() : 0;
-    result = 31 * result + (args != null ? Arrays.hashCode(args) : 0);
-    return result;
-  }
 
 }

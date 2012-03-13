@@ -34,7 +34,6 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-
   public TestConfiguration createTestBlueprint() {
     try {
       return Blueprint.createBlueprint(TestConfiguration.class,
@@ -49,7 +48,6 @@ public class BlueprintTest {
       throw new RuntimeException(e);
     }
   }
-
 
   public void validationFails() {
     try {
@@ -66,7 +64,6 @@ public class BlueprintTest {
     }
   }
 
-
   public void methodsFromObjectBehaveNormally() {
     TestConfiguration cfg = createTestBlueprint();
     assertNotNull(cfg.toString());
@@ -77,7 +74,6 @@ public class BlueprintTest {
     assertFalse(cfg.equals(this));
   }
 
-  
   public void simpleDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertEquals(cfg.serviceName(), "BlueprintTestService");
@@ -85,7 +81,6 @@ public class BlueprintTest {
     assertEquals(cfg.timeout(), 10);
     assertEquals(cfg.tempDir(), new File("/tmp/blueprint"));
   }
-
 
   public void collectionDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
@@ -95,7 +90,6 @@ public class BlueprintTest {
     assertEquals(iter.next().intValue(), 8);
     assertEquals(iter.next().intValue(), 18);
   }
-
 
   public void mapDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
@@ -107,7 +101,6 @@ public class BlueprintTest {
     assertEquals(cfg.protocols().get("dns").port(), 53);
   }
 
-
   public void typeHinting()
           throws MalformedURLException {
     TestConfiguration cfg = createTestBlueprint();
@@ -117,7 +110,6 @@ public class BlueprintTest {
     assertEquals(cfg.deployUrl().getClass(), URL.class);
     assertEquals(cfg.deployUrl(), new URL("http://www.codemined.org/Blueprint"));
   }
-
 
   public void typeHintPrecedence()
           throws MalformedURLException {
@@ -133,14 +125,12 @@ public class BlueprintTest {
     assertEquals(cfg.hi2(A2.class).toString(), "2:A2:A1:A");
   }
 
-  
   public void interfaceDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertTrue(TestConfiguration._DB.class.isInstance(cfg.db()));
     assertTrue(cfg.db().development().isTemporary());
     assertFalse(cfg.db().production().isTemporary());
   }
-
 
   public void classDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
@@ -154,4 +144,9 @@ public class BlueprintTest {
     assertTrue(cfg.keyTwo());
   }
 
+  public void specialValueMethod() {
+    TestConfiguration cfg = createTestBlueprint();
+    assertEquals(cfg.protocols().get("telnet").$value(), "enabled");
+  }
+  
 }
