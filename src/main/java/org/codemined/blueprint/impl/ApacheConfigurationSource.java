@@ -86,26 +86,24 @@ public class ApacheConfigurationSource implements Source {
           return true;
         }
 
-        // Loop while Apache Configuration is returning us keys,
-        // ignoring components that we've already seen
+        /* generate all unique sub-keys under this path */
         while (nextComponent == null && iter.hasNext()) {
           String key = iter.next();
-          // skip the root path itself
-          if (key.equals(path)) {
-            continue;
-          }
-          // trim leading root path and the `.' after it
-          key = key.substring(path.length() + 1);
-          // trim any trailing components after the first one
-          int dotPosition = key.indexOf('.');
-          if (dotPosition >= 0) {
-            key = key.substring(0, dotPosition);
-          }
-          if (seenComponents.contains(key)) {
-            nextComponent = null;
-          } else {
-            nextComponent = key;
-            seenComponents.add(nextComponent);
+          if (! key.equals(path)) {
+            /* trim leading root path and the `.' after it */
+            key = key.substring(path.length() + 1);
+            /* trim any trailing components after the first one */
+            int dotPosition = key.indexOf('.');
+            if (dotPosition >= 0) {
+              key = key.substring(0, dotPosition);
+            }
+
+            if (seenComponents.contains(key)) {
+              nextComponent = null;
+            } else {
+              nextComponent = key;
+              seenComponents.add(nextComponent);
+            }
           }
         }
         return (nextComponent != null);

@@ -33,11 +33,11 @@ import java.util.Set;
  */
 public class Blueprint {
   private static MethodValidator validator = Validation
-      .byProvider(HibernateValidator.class)
-      .configure()
-      .buildValidatorFactory()
-      .getValidator()
-      .unwrap(MethodValidator.class);
+          .byProvider(HibernateValidator.class)
+          .configure()
+          .buildValidatorFactory()
+          .getValidator()
+          .unwrap(MethodValidator.class);
 
 
   /**
@@ -50,7 +50,7 @@ public class Blueprint {
           throws InvalidConfigurationException {
     if (!iface.isInterface()) {
       throw new IllegalArgumentException(
-        "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
+              "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
     }
 
     final Deserializer deserializer = new Deserializer(null, source, iface.getClassLoader());
@@ -66,7 +66,7 @@ public class Blueprint {
 
 
   private static <T> void validate(Class<T> iface, T blueprint) 
-      throws InvalidConfigurationException {
+          throws InvalidConfigurationException {
     LinkedList<String> failedValidations = new LinkedList<String>();
 
     try {
@@ -74,7 +74,8 @@ public class Blueprint {
         Method method = blueprint.getClass().getMethod(
                 ifaceMethod.getName(),
                 ifaceMethod.getParameterTypes());
-        // skip methods with type hints as optional parameters (complicated to figure out the proper call)
+        /* skip methods with type hints as optional parameters
+        (figuring out the correct arguments is nontrivial) */
         if (method.getDeclaringClass().equals(blueprint.getClass()) &&
                 method.getParameterTypes().length == 0) {
           Object returnValue = method.invoke(blueprint);
@@ -100,7 +101,7 @@ public class Blueprint {
                 "This might indicate a bug in Blueprint.");
       }
 
-      // all other exceptions indicate bugs in Blueprint and/or JVM.
+      /* all other exceptions indicate bugs in Blueprint */
     } catch (NoSuchMethodException e) {
       throw fromException(iface, e);
     } catch (IllegalAccessException e) {

@@ -28,9 +28,9 @@ import java.util.NoSuchElementException;
  * @author Zoran Rilak
  */
 class Deserializer {
-  // keep `valueOf' last so that we can circumvent this very common
-  // static method with a custom one from among those above it.
-  // Very useful for e.g. case-insensitive deserialization of enums.
+  /* keep `valueOf' last so that we can circumvent this very common
+  static method with a custom one from among those above it.
+  Very useful for e.g. case-insensitive deserialization of enums. */
   private static final String[] STATIC_DESERIALIZER_METHODS = {
           "fromString",
           "parse",
@@ -54,7 +54,6 @@ class Deserializer {
   public <T> T deserialize(Class<T> returnType, @SuppressWarnings("rawtypes") Class hintedType, String key) {
 
     /* Maps and collections require type hint to determine the element type. */
-
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a type hint");
@@ -71,7 +70,6 @@ class Deserializer {
 
     /* Other (non-map, non-collection) return types will be superseded by the
     hinted type if given; it the types are not compatible, an exception is thrown. */
-
     if (hintedType != null) {
       try {
         returnType = hintedType.asSubclass(returnType);
@@ -90,8 +88,8 @@ class Deserializer {
       return deserializeClass(key);
     }
 
-    // else try to deserialize as a simple type (through a static factory method or ctor)
-    // if a type hint is present, try to downcast it to the actual return type
+    /* if no special handling applies, deserialize as a simple type
+    (through a static factory method or String ctor) */
     return deserializeSimpleType(returnType, key);
   }
 

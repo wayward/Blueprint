@@ -30,18 +30,17 @@ import java.util.Map;
 public interface TestConfiguration {
 
   /* We can instantiate objects through static methods valueOf(String), parse(String),
-  fromString(String) and deserialize(String), or using a single-arg constructor
-  #ctor(String). */
+  fromString(String) and deserialize(String), or using a single-arg constructor(String). */
   String serviceName();
 
 
-  /* Primitive return types are handled as above by delegating the instantiation to the
-  appropriate static method or single-arg constructor from their boxed counterparts. */
+  /* Primitive return types are handled as above, but changing the primitive type
+  into its boxed counterpart. */
   boolean isActive();
 
 
   /* Zero-argument methods are eligible for automatic validation of their return values
-  against the constraints from javax.validation.constraints.* placed on the method.
+  against any javax.validation.constraints.* constraints present on the method.
   If a return value of any such method fails to validate, a BlueprintException will be
   thrown to indicate that a valid blueprint cannot be created from the specified source. */
   @Min(0) @Max(60)
@@ -51,7 +50,7 @@ public interface TestConfiguration {
   @NotNull
   File tempDir();
 
-  /* URLs can be deserialized quite nicely. */
+  /* URLs and URIs deserialize quite nicely. */
   URL deployUrl();
 
   /* Abstract collection types can be deserialized semi-automatically with the help of
