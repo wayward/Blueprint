@@ -1,44 +1,39 @@
 package org.codemined.blueprint;
 
+import mockit.Expectations;
+import mockit.Mocked;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
+
+import static org.testng.Assert.assertEquals;
+
+@SuppressWarnings("unused")
 @Test
 public class StubTest {
-/*
-  interface Dummy {
+  final String CHILD_METHOD_NAME = "childMethod";
 
-    @UseType(Integer.class) int someInteger();
+  @Mocked Deserializer mockDeserializer;
 
-    String someString();
+  interface ChildIface {
+    int childMethod();
   }
   
-  IMocksControl control;
-  
-  private Deserializer mockDeserializer;
-
-  private Stub<Dummy> stub;
-  
-  @BeforeMethod
-  public void setUp() {
-    control = createControl();
-    mockDeserializer = control.createMock(Deserializer.class);
-    stub = new Stub<Dummy>(Dummy.class, mockDeserializer);
+  interface BlueprintIface extends ChildIface {
+    int aMethod();
   }
   
-  public void testProxyInteger() {
-    expect(mockDeserializer.deserialize(Integer.class, Integer.class, "someInteger"))
-        .andReturn(42);
-    control.replay();
-    assertEquals(42, stub.getProxy().someInteger());
-    control.verify();
+  @Test
+  public void picksUpInheritedMethods()
+          throws Throwable {
+    new Expectations() {{
+      mockDeserializer.deserialize(Integer.class, null, CHILD_METHOD_NAME); result = 42;
+    }};
+    Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class, mockDeserializer);
+    Method method = BlueprintIface.class.getMethod(CHILD_METHOD_NAME);
+    Object value = stub.invoke(stub.getProxy(), method, null);
+
+    assertEquals(value, 42);
   }
 
-  public void testProxyString() {
-    expect(mockDeserializer.deserialize(String.class, null, "someString"))
-        .andReturn("hello kitty");
-    control.replay();
-    assertEquals("hello kitty", stub.getProxy().someString());
-    control.verify();
-  }
-*/
 }
