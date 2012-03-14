@@ -26,6 +26,7 @@ package org.codemined.blueprint;
  - Stub caching strategy might be configurable if we allow the configurations to change
    (but keep validations in mind: do we re-run them, and if so, when?) */
 
+import javax.inject.Named;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -142,14 +143,21 @@ class Stub<I> implements InvocationHandler {
   }
 
   private String getKeyFor(Method method) {
-    // handle special methods
+    /* handle special methods */
     if (VALUE_METHOD_NAME.equals(method.getName())) {
       return null;
     }
+    /* check for our Key annotation first */
     Key keyAnn = method.getAnnotation(Key.class);
     if (keyAnn != null) {
       return keyAnn.value();
     }
+    /* if absent, check for javax.inject.Named */
+    Named javaxNamedAnn = method.getAnnotation(Named.class);
+    if (javaxNamedAnn != null) {
+      return javaxNamedAnn.value();
+    }
+    /* no overrides -- return the method's name */
     return method.getName();
   }
 

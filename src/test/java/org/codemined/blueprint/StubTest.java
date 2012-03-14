@@ -8,18 +8,19 @@ import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
 
-@SuppressWarnings("unused")
 @Test
 public class StubTest {
   final String CHILD_METHOD_NAME = "childMethod";
 
   @Mocked Deserializer mockDeserializer;
 
-  interface ChildIface {
+  @SuppressWarnings("unused")
+  private interface ChildIface {
     int childMethod();
   }
-  
-  interface BlueprintIface extends ChildIface {
+
+  @SuppressWarnings("unused")
+  private interface BlueprintIface extends ChildIface {
     int aMethod();
   }
   
