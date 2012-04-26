@@ -24,6 +24,8 @@ import java.util.Iterator;
  * 
  * <p><em>NOT THREAD-SAFE.</em></p>
  *
+ * TODO make abstract, remove `value'
+ *
  * @param <K>
  * @param <V>
  */

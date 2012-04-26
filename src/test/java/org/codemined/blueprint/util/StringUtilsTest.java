@@ -56,14 +56,23 @@ public class StringUtilsTest {
   
   @Test
   public void split() {
-    List<String> l =StringUtils.split("a.b..c.d", ".");
+    List<String> l = StringUtils.split("a.b..c.d", ".");
     assertEquals(l.size(), 5);
     assertEquals(l.get(2), "");
   }
   
   @Test
-  public void joinTest() {
-    
+  public void joinEmptyStrings() {
+    assertEquals(StringUtils.join("."), "");
+    assertEquals(StringUtils.join(".", ""), "");
+    assertEquals(StringUtils.join(".", "", null), "");
+    assertEquals(StringUtils.join(".", "", null, "", null), "");
   }
+
+  @Test
+  public void joinWithEmptyStrings() {
+    assertEquals(StringUtils.join(".", null, "", null, "a", "b", "", "c", "d"), "a.b..c.d");
+  }
+
   
 }

@@ -2,7 +2,7 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import org.codemined.InMemoryTree;
+import org.codemined.blueprint.tree.TestTree;
 import org.testng.annotations.Test;
 
 import javax.inject.Named;
@@ -27,23 +27,18 @@ public class KeyTest {
     @Key("keyOverride") @Named("namedOverride") int bothOverrideMethod();
   }
 
-  class TestTree extends InMemoryTree<String,String> {
-    public TestTree(String key, String value) {
-      super(key, value, null);
-    }
-  }
-
-  @Mocked TestTree mockedTree;
+  @Mocked
+  TestTree mockTree;
 
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
-      mockedTree.get("keyOverride"); result = mockedTree;
-      mockedTree.value(); result = "42";
+      mockTree.get("keyOverride"); result = mockTree;
+      mockTree.value(); result = "42";
     }};
-    Deserializer deserializer = new Deserializer(mockedTree, Iface.class.getClassLoader());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, deserializer);
+    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
+    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
     Method method = Iface.class.getMethod("keyOverridesMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);
@@ -53,11 +48,11 @@ public class KeyTest {
   public void namedAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
-      mockedTree.get("namedOverride"); result = mockedTree;
-      mockedTree.value(); result = "42";
+      mockTree.get("namedOverride"); result = mockTree;
+      mockTree.value(); result = "42";
     }};
-    Deserializer deserializer = new Deserializer(mockedTree, Iface.class.getClassLoader());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, deserializer);
+    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
+    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
     Method method = Iface.class.getMethod("namedOverridesMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);
@@ -67,11 +62,11 @@ public class KeyTest {
   public void keyAnnotationSupersedesNamedAnnotation()
           throws Throwable {
     new Expectations() {{
-      mockedTree.get("keyOverride"); result = mockedTree;
-      mockedTree.value(); result = "42";
+      mockTree.get("keyOverride"); result = mockTree;
+      mockTree.value(); result = "42";
     }};
-    Deserializer deserializer = new Deserializer(mockedTree, Iface.class.getClassLoader());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, deserializer);
+    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
+    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
     Method method = Iface.class.getMethod("bothOverrideMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);

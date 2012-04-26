@@ -26,6 +26,8 @@ package org.codemined.blueprint;
  - Stub caching strategy might be configurable if we allow the configurations to change
    (but keep validations in mind: do we re-run them, and if so, when?) */
 
+import org.codemined.Tree;
+
 import javax.inject.Named;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -67,23 +69,35 @@ import java.util.Map;
  * @since 0.1
  */
 class Stub<I> implements InvocationHandler {
+
   private final String VALUE_METHOD_NAME = "$value";
+
   private final String COLLECT_METHOD_NAME = "$asMap";
+
   private final Class<I> iface;
+
+  private final Tree<String,String> cfg;
+
   private final Deserializer deserializer;
+
   private final Map<MethodInvocation, Object> cache;
+
   private final I proxy;
 
-  public Stub(Class<I> iface, Deserializer deserializer) {
+
+  public Stub(Class<I> iface, Tree configTree, Deserializer deserializer) {
     this.iface = iface;
+    this.cfg = configTree;
     this.deserializer = deserializer;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
     this.proxy = createProxy();
   }
 
+
   public I getProxy() {
     return proxy;
   }
+
 
   /* Methods from InvocationHandler --------------------------------- */
 
@@ -100,7 +114,14 @@ class Stub<I> implements InvocationHandler {
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
       if (o == null) {
-        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key);
+        Tree<String,String> t = cfg.get(key);
+        if (t == null) {
+          throw new BlueprintException("Configuration key " + key + " does not exist" +
+                  " on path " + cfg.path() +
+                  ", for class " + iface.getCanonicalName() +
+                  ", method " + method.getName());
+        }
+        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), t);
         cache.put(invocation, o);
       }
       return o;
@@ -110,12 +131,15 @@ class Stub<I> implements InvocationHandler {
     }
   }
 
+
   /* Methods from Object -------------------------------------------- */
+
 
   @Override
   public boolean equals(Object o) {
     return proxy == o;
   }
+
 
   @Override
   public int hashCode() {
@@ -124,12 +148,15 @@ class Stub<I> implements InvocationHandler {
     return result;
   }
 
+
   @Override
   public String toString() {
     return "[" + iface.getName() + " blueprint]";
   }
 
+
   /* Privates ------------------------------------------------------- */
+
 
   private I createProxy() {
     try {
@@ -141,6 +168,7 @@ class Stub<I> implements InvocationHandler {
       throw new BlueprintException("Error casting proxy instance to " + iface.getName(), e);
     }
   }
+
 
   private String getKeyFor(Method method) {
     /* handle special methods */
@@ -160,6 +188,7 @@ class Stub<I> implements InvocationHandler {
     /* no overrides -- return the method's name */
     return method.getName();
   }
+
 
   private String buildExceptionMessage(String cause, Method method, Object... args) {
     return String.format("%s, in method %s%s, class %s",

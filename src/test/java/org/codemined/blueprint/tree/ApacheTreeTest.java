@@ -19,9 +19,14 @@ package org.codemined.blueprint.tree;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.impl.ApacheTree;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Zoran Rilak
@@ -29,10 +34,23 @@ import static org.testng.Assert.assertEquals;
 @Test
 public class ApacheTreeTest {
 
+  private static final String TEST_PROPERTIES_FILE = "src/test/resources/test.properties";
+  private TestProperties testProperties;
+
+  @BeforeClass
+  public void setUp()
+          throws IOException {
+    this.testProperties = new TestProperties();
+    this.testProperties.load(new FileInputStream(TEST_PROPERTIES_FILE));
+  }
+
   @Test
   public ApacheTree loadTree() {
     try {
-      return new ApacheTree(new PropertiesConfiguration("src/test/resources/test.properties"));
+      PropertiesConfiguration pc = new PropertiesConfiguration(TEST_PROPERTIES_FILE);
+      pc.setDelimiterParsingDisabled(true);
+      pc.refresh();
+      return new ApacheTree(pc);
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
     }
@@ -44,6 +62,15 @@ public class ApacheTreeTest {
     assertEquals(t.key(), null);
     assertEquals(t.value(), null);
     assertEquals(t.size(), 14);
+  }
+
+  @Test
+  public void validFirstLevelNodes() {
+    ApacheTree t = loadTree();
+    assertEquals(t.size(), testProperties.firstLevelKeys().size());
+    for (String k : testProperties.firstLevelKeys()) {
+      assertTrue(t.contains(k), "key '" + k + "' exists in properties but not in the tree");
+    }
   }
 
 }

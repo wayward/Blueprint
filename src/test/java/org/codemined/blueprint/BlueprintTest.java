@@ -36,10 +36,10 @@ public class BlueprintTest {
 
   public TestConfiguration createTestBlueprint() {
     try {
-      return Blueprint.createBlueprint(TestConfiguration.class,
-              new ApacheTree(
-                      new PropertiesConfiguration("src/test/resources/test.properties")));
-
+      PropertiesConfiguration pc = new PropertiesConfiguration("src/test/resources/test.properties");
+      pc.setDelimiterParsingDisabled(true);
+      pc.refresh();
+      return Blueprint.createBlueprint(TestConfiguration.class, new ApacheTree(pc));
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
@@ -52,9 +52,10 @@ public class BlueprintTest {
   @Test
   public void validationFails() {
     try {
-      Blueprint.createBlueprint(TestConfiguration.class,
-              new ApacheTree(
-                      new PropertiesConfiguration("src/test/resources/test-failing-validations.properties")));
+      PropertiesConfiguration pc = new PropertiesConfiguration("src/test/resources/test-failing-validations.properties");
+      pc.setDelimiterParsingDisabled(true);
+      pc.refresh();
+      Blueprint.createBlueprint(TestConfiguration.class, new ApacheTree(pc));
       fail();
 
     } catch (ConfigurationException e) {

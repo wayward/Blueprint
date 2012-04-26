@@ -51,18 +51,19 @@ public class StringUtils {
 
     StringBuilder sb = new StringBuilder();
     Iterator<String> iter = components.iterator();
-    boolean isFirstComp = true;
     while (iter.hasNext()) {
       String comp = iter.next();
+      // skip null components
       if (comp == null) {
         continue;
       }
-      sb.append(comp);
-      if (iter.hasNext() && ! isFirstComp) {
+
+      if (sb.length() > 0) {
         sb.append(separator);
       }
-      isFirstComp = false;
+      sb.append(comp);
     }
+
     return sb.toString();
   }
 

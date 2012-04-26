@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
  * @author Zoran Rilak
  */
 class Deserializer {
+
   /* keep `valueOf' last so that we can circumvent this very common
   static method with a custom one from among those above it.
   Very useful for e.g. case-insensitive deserialization of enums. */
@@ -39,32 +40,30 @@ class Deserializer {
           "valueOf"
   };
 
-  private final Tree<String,String> tree;
   private final ClassLoader classLoader;
 
 
-  public Deserializer(Tree<String,String> tree, ClassLoader classLoader) {
-    this.tree = tree;
+  public Deserializer(ClassLoader classLoader) {
     this.classLoader = classLoader;
   }
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(Class<T> returnType, @SuppressWarnings("rawtypes") Class hintedType, String key) {
+  public <T> T deserialize(Class<T> returnType, Class hintedType, Tree<String,String> tree) {
 
     /* Maps and collections require type hint to determine the element type. */
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a type hint");
       }
-      return (T) deserializeMap(hintedType, key);
+      return (T) deserializeMap(hintedType, tree);
     }
 
     if (Collection.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Collections require a type hint");
       }
-      return (T) deserializeCollection(returnType, hintedType, key);
+      return (T) deserializeCollection(returnType, hintedType, tree);
     }
 
     /* Other (non-map, non-collection) return types will be superseded by the
@@ -80,76 +79,70 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      return deserializeInterface(returnType, key);
+      return deserializeInterface(returnType, tree);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
-      return deserializeClass(key);
+      return deserializeClass(tree);
     }
 
     /* if no special handling applies, deserialize as a simple type
     (through a static factory method or String ctor) */
-    return deserializeSimpleType(returnType, key);
+    return deserializeSimpleType(returnType, tree);
   }
 
 
   /**
    *
    * @param elementType
-   * @param key
+   * @param tree
    * @param <E>
    * @return
    */
-  public <E> Map<String, E> deserializeMap(Class<E> elementType, String key) {
+  public <E> Map<String, E> deserializeMap(Class<E> elementType, Tree<String,String> tree) {
     final Map<String, E> targetMap = Reifier.reifyStringMap();
-    final Tree<String,String> subTree = tree.get(key);
-    if (subTree != null) {
-      for (Tree<String,String> t : subTree) {
-        final String k = t.key();
-        final E element = deserialize(elementType, null, k);
-        targetMap.put(k, element);
-      }
+    for (Tree<String,String> subTree : tree) {
+      final E element = deserialize(elementType, null, subTree);
+      targetMap.put(subTree.key(), element);
     }
     return targetMap;
   }
 
 
-  private <E> Collection<E> deserializeCollection(Class<?> type, Class<E> elementType, String key) {
+  private <E> Collection<E> deserializeCollection(Class<?> type, Class<E> elementType, Tree<String,String> tree) {
     final Collection<E> targetCollection = Reifier.reifyCollection(type);
-
-    for (Tree<String,String> t : tree.get(key)) {
-      targetCollection.add(deserializeSimpleTypeFromValue(elementType, t.value()));
+    String[] elements = tree.value().split("[,\\s]");  // comma and whitespace
+    for (String e : elements) {
+      targetCollection.add(deserializeSimpleTypeFromValue(elementType, e));
     }
     return targetCollection;
   }
 
 
-  private <T> T deserializeInterface(Class<T> type, String key) {
+  private <T> T deserializeInterface(Class<T> type, Tree<String,String> tree) {
     // TODO will need a better way to determine which classloader to use for child deserializers
     // TODO won't work for intermediary, nonexistent nodes (i.e. when a.b.c exists but a.b does not)
-    final Tree<String,String> subTree = tree.get(key);
-    final Deserializer childDeserializer = new Deserializer(subTree, type.getClassLoader());
-    return new Stub<T>(type, childDeserializer).getProxy();
+    return new Stub<T>(type, tree, this).getProxy();
   }
 
 
   /**
-   * @param key
+   * @param tree
    * @param <T>
    * @return
    */
   @SuppressWarnings("unchecked")
-  private <T> T deserializeClass(String key) {
+  private <T> T deserializeClass(Tree<String,String> tree) {
     try {
-      return (T) classLoader.loadClass(tree.get(key).value());
+      return (T) classLoader.loadClass(tree.value());
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
   }
 
 
-  private <T> T deserializeSimpleType(Class<T> type, String key) {
-    return deserializeSimpleTypeFromValue(type, tree.get(key).value());
+  private <T> T deserializeSimpleType(Class<T> type, Tree<String,String> tree) {
+    return deserializeSimpleTypeFromValue(type, tree.value());
   }
 
   private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {

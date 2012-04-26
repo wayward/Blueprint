@@ -54,8 +54,8 @@ public class Blueprint {
               "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
     }
 
-    final Deserializer deserializer = new Deserializer(tree, iface.getClassLoader());
-    final Stub<T> stub = new Stub<T>(iface, deserializer);
+    final Deserializer deserializer = new Deserializer(iface.getClassLoader());
+    final Stub<T> stub = new Stub<T>(iface, tree, deserializer);
     final T blueprint = stub.getProxy();
 
     validate(iface, blueprint);
