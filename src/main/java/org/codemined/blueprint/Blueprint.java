@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.Tree;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.method.MethodConstraintViolation;
 import org.hibernate.validator.method.MethodValidator;
@@ -42,18 +43,18 @@ public class Blueprint {
 
   /**
    * @param iface the interface for configuration access.
-   * @param source the source to get the configuration from
+   * @param tree configuration tree
    * @return an object of {@code iface}, stubbed to return reified values from the configuration. 
    * @throws InvalidConfigurationException in case of errors
    */
-  public static <T> T createBlueprint(Class<T> iface, Source source)
+  public static <T> T createBlueprint(Class<T> iface, Tree<String, String> tree)
           throws InvalidConfigurationException {
     if (!iface.isInterface()) {
       throw new IllegalArgumentException(
               "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
     }
 
-    final Deserializer deserializer = new Deserializer(null, source, iface.getClassLoader());
+    final Deserializer deserializer = new Deserializer(tree, iface.getClassLoader());
     final Stub<T> stub = new Stub<T>(iface, deserializer);
     final T blueprint = stub.getProxy();
 

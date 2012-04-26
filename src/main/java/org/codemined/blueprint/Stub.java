@@ -162,11 +162,11 @@ class Stub<I> implements InvocationHandler {
   }
 
   private String buildExceptionMessage(String cause, Method method, Object... args) {
-    return String.format("%s, in class %s, method %s%s",
+    return String.format("%s, in method %s%s, class %s",
             cause,
-            iface.getName(),
             method.getName(),
-            args == null ? "[]" : Arrays.asList(args));
+            args == null ? "[]" : Arrays.asList(args),
+            iface.getName());
   }
 
 }

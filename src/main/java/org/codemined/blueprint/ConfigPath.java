@@ -16,32 +16,17 @@
 
 package org.codemined.blueprint;
 
-import java.util.Collection;
-import java.util.Iterator;
+import org.codemined.Path;
+
+import java.util.Arrays;
 
 /**
- * Configuration source.  It behaves like a tree, which it is.
- *
  * @author Zoran Rilak
- * @version 0.1
- * @since 0.1
  */
-@Deprecated
-public interface Source {
+public class ConfigPath extends Path<String> {
 
-  /** Null components are silently ignored. */
-  String composePath(String... component);
-
-  String getString(String path);
-
-  Collection<String> getCollection(String path);
-
-  /**
-   * Returns an iterator over the sub-components of a path.
-   *
-   * @param path
-   * @return
-   */
-  Iterator<String> getSubComponents(String path);
+  public ConfigPath(String[] keys) {
+    super(Arrays.asList(keys));
+  }
 
 }

@@ -113,7 +113,7 @@ public class ApacheConfigurationSource implements Source {
       public String next() {
         if (!hasNext()) {
           throw new NoSuchElementException(
-              String.format("For path: %s, last: %s", path, nextComponent));
+                  String.format("For path: %s, last: %s", path, nextComponent));
         }
         String s = nextComponent;
         nextComponent = null;

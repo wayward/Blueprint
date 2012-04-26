@@ -18,7 +18,7 @@ package org.codemined.blueprint;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.codemined.blueprint.impl.ApacheConfigurationSource;
+import org.codemined.blueprint.impl.ApacheTree;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -37,7 +37,7 @@ public class BlueprintTest {
   public TestConfiguration createTestBlueprint() {
     try {
       return Blueprint.createBlueprint(TestConfiguration.class,
-              new ApacheConfigurationSource(
+              new ApacheTree(
                       new PropertiesConfiguration("src/test/resources/test.properties")));
 
 
@@ -49,10 +49,11 @@ public class BlueprintTest {
     }
   }
 
+  @Test
   public void validationFails() {
     try {
       Blueprint.createBlueprint(TestConfiguration.class,
-              new ApacheConfigurationSource(
+              new ApacheTree(
                       new PropertiesConfiguration("src/test/resources/test-failing-validations.properties")));
       fail();
 
@@ -64,6 +65,7 @@ public class BlueprintTest {
     }
   }
 
+  @Test
   public void methodsFromObjectBehaveNormally() {
     TestConfiguration cfg = createTestBlueprint();
     assertNotNull(cfg.toString());
@@ -74,6 +76,7 @@ public class BlueprintTest {
     assertFalse(cfg.equals(this));
   }
 
+  @Test
   public void simpleDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertEquals(cfg.serviceName(), "BlueprintTestService");
@@ -82,6 +85,7 @@ public class BlueprintTest {
     assertEquals(cfg.tempDir(), new File("/tmp/blueprint"));
   }
 
+  @Test
   public void collectionDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertEquals(cfg.backupHours(Integer.class).size(), 3);
@@ -91,6 +95,7 @@ public class BlueprintTest {
     assertEquals(iter.next().intValue(), 18);
   }
 
+  @Test
   public void mapDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertEquals(cfg.http().size(), 3);
@@ -101,6 +106,7 @@ public class BlueprintTest {
     assertEquals(cfg.protocols().get("dns").port(), 53);
   }
 
+  @Test
   public void typeHinting()
           throws MalformedURLException {
     TestConfiguration cfg = createTestBlueprint();
@@ -111,6 +117,7 @@ public class BlueprintTest {
     assertEquals(cfg.deployUrl(), new URL("http://www.codemined.org/Blueprint"));
   }
 
+  @Test
   public void typeHintPrecedence()
           throws MalformedURLException {
     TestConfiguration cfg = createTestBlueprint();
@@ -125,6 +132,7 @@ public class BlueprintTest {
     assertEquals(cfg.hi2(A2.class).toString(), "2:A2:A1:A");
   }
 
+  @Test
   public void interfaceDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertTrue(TestConfiguration._DB.class.isInstance(cfg.db()));
@@ -132,18 +140,21 @@ public class BlueprintTest {
     assertFalse(cfg.db().production().isTemporary());
   }
 
+  @Test
   public void classDeserialization() {
     TestConfiguration cfg = createTestBlueprint();
     assertSame(cfg.db().impl(), java.util.Random.class);
     assertSame(cfg.db().impl(Class.class), java.util.Random.class);
   }
 
+  @Test
   public void overridingKeys() {
     TestConfiguration cfg = createTestBlueprint();
     assertTrue(cfg.key1());
     assertTrue(cfg.keyTwo());
   }
 
+  @Test
   public void specialValueMethod() {
     TestConfiguration cfg = createTestBlueprint();
     assertEquals(cfg.protocols().get("telnet").$value(), "enabled");

@@ -14,34 +14,43 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint;
+package org.codemined;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 
 /**
- * Configuration source.  It behaves like a tree, which it is.
- *
+ * An immutable N-ary tree.
+ * 
  * @author Zoran Rilak
- * @version 0.1
- * @since 0.1
  */
-@Deprecated
-public interface Source {
+public interface Tree<K,V> extends Iterable<Tree<K,V>> {
 
-  /** Null components are silently ignored. */
-  String composePath(String... component);
+  K key();
 
-  String getString(String path);
+  V value();
 
-  Collection<String> getCollection(String path);
+  Tree<K,V> parent();
+
+  List<K> path();
+
+  Tree<K,V> get(K subKey);
+
+  Tree<K,V> get(List<K> path);
+
+  boolean contains(K subKey);
+
+  Tree<K,V> put(K subKey, V value);
+
+  Tree<K,V> put(List<K> path, V value);
+
+  Tree<K,V> put(List<K> path, V intermediaryValue, V value);
 
   /**
-   * Returns an iterator over the sub-components of a path.
+   * <p>Returns the number of sub-trees.</p>
    *
-   * @param path
    * @return
    */
-  Iterator<String> getSubComponents(String path);
+  int size();
 
 }
+

@@ -16,11 +16,12 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.Tree;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -38,14 +39,12 @@ class Deserializer {
           "valueOf"
   };
 
-  private final String prefix;
-  private final Source source;
+  private final Tree<String,String> tree;
   private final ClassLoader classLoader;
 
 
-  public Deserializer(String prefix, Source source, ClassLoader classLoader) {
-    this.prefix = prefix;
-    this.source = source;
+  public Deserializer(Tree<String,String> tree, ClassLoader classLoader) {
+    this.tree = tree;
     this.classLoader = classLoader;
   }
 
@@ -102,34 +101,34 @@ class Deserializer {
    * @return
    */
   public <E> Map<String, E> deserializeMap(Class<E> elementType, String key) {
-    final String path = source.composePath(prefix, key);
-    final Iterator<String> iter = source.getSubComponents(path);
     final Map<String, E> targetMap = Reifier.reifyStringMap();
-
-    while (iter.hasNext()) {
-      final String subKey = iter.next();
-      final E element = deserialize(elementType, null, source.composePath(key, subKey));
-      targetMap.put(subKey, element);
+    final Tree<String,String> subTree = tree.get(key);
+    if (subTree != null) {
+      for (Tree<String,String> t : subTree) {
+        final String k = t.key();
+        final E element = deserialize(elementType, null, k);
+        targetMap.put(k, element);
+      }
     }
     return targetMap;
   }
 
 
   private <E> Collection<E> deserializeCollection(Class<?> type, Class<E> elementType, String key) {
-    final Collection<String> values = source.getCollection(key);
     final Collection<E> targetCollection = Reifier.reifyCollection(type);
 
-    for (String v : values) {
-      targetCollection.add(deserializeSimpleTypeFromValue(elementType, v));
+    for (Tree<String,String> t : tree.get(key)) {
+      targetCollection.add(deserializeSimpleTypeFromValue(elementType, t.value()));
     }
     return targetCollection;
   }
 
 
   private <T> T deserializeInterface(Class<T> type, String key) {
-    // TODO will need a better way to determine the classloader to use for child deserializers
-    final String path = source.composePath(prefix, key);
-    final Deserializer childDeserializer = new Deserializer(path, source, type.getClassLoader());
+    // TODO will need a better way to determine which classloader to use for child deserializers
+    // TODO won't work for intermediary, nonexistent nodes (i.e. when a.b.c exists but a.b does not)
+    final Tree<String,String> subTree = tree.get(key);
+    final Deserializer childDeserializer = new Deserializer(subTree, type.getClassLoader());
     return new Stub<T>(type, childDeserializer).getProxy();
   }
 
@@ -141,9 +140,8 @@ class Deserializer {
    */
   @SuppressWarnings("unchecked")
   private <T> T deserializeClass(String key) {
-    final String path = source.composePath(prefix, key);
     try {
-      return (T) classLoader.loadClass(source.getString(path));
+      return (T) classLoader.loadClass(tree.get(key).value());
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
@@ -151,15 +149,14 @@ class Deserializer {
 
 
   private <T> T deserializeSimpleType(Class<T> type, String key) {
-    final String path = source.composePath(prefix, key);
-    return deserializeSimpleTypeFromValue(type, source.getString(path));
+    return deserializeSimpleTypeFromValue(type, tree.get(key).value());
   }
 
   private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {
     T o;
     for (String methodName : STATIC_DESERIALIZER_METHODS) {
       o = useStaticDeserializer(type, methodName, value);
-      if (o  != null) {
+      if (o != null) {
         return o;
       }
     }
