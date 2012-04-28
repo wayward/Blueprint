@@ -11,7 +11,6 @@ import static org.testng.Assert.assertEquals;
 
 @Test
 public class StubTest {
-  final String CHILD_METHOD_NAME = "childMethod";
 
   @Mocked Deserializer mockDeserializer;
 
@@ -31,11 +30,11 @@ public class StubTest {
   public void picksUpInheritedMethods()
           throws Throwable {
     new Expectations() {{
-      mockTree.value(); result = "42";
+      mockTree.get("childMethod"); result = mockTree;
       mockDeserializer.deserialize(Integer.class, null, mockTree); result = 42;
     }};
     Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class, mockTree, mockDeserializer);
-    Method method = BlueprintIface.class.getMethod(CHILD_METHOD_NAME);
+    Method method = BlueprintIface.class.getMethod("childMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
 
     assertEquals(value, 42);

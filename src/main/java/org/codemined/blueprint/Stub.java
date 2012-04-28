@@ -70,9 +70,9 @@ import java.util.Map;
  */
 class Stub<I> implements InvocationHandler {
 
-  private final String VALUE_METHOD_NAME = "$value";
+  private final String SPECIAL_METHOD_VALUE = "$value";
 
-  private final String COLLECT_METHOD_NAME = "$asMap";
+  private final String SPECIAL_METHOD_COLLECTION = "$asMap";
 
   private final Class<I> iface;
 
@@ -108,19 +108,28 @@ class Stub<I> implements InvocationHandler {
       return method.invoke(this, args);
     }
 
-    // Values are cached by (method, args) pairs to support type hinting in arguments.
     final String key = getKeyFor(method);
     try {
+      // Values are cached by (method, args) pairs to support type hinting in arguments.
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
       if (o == null) {
-        Tree<String,String> t = cfg.get(key);
+        // Get the tree whose value will be passed to the deserializer.
+        // For special methods ($value, $asMap etc.), use the tree associated with this stub
+        // instead of looking up children trees.
+        Tree<String,String> t;
+        if (key == null) {
+          t = cfg;
+        } else {
+          t = cfg.get(key);
+        }
         if (t == null) {
-          throw new BlueprintException("Configuration key " + key + " does not exist" +
+          throw new BlueprintException("Configuration key '" + key + "' does not exist" +
                   " on path " + cfg.path() +
                   ", for class " + iface.getCanonicalName() +
                   ", method " + method.getName());
         }
+
         o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), t);
         cache.put(invocation, o);
       }
@@ -172,7 +181,7 @@ class Stub<I> implements InvocationHandler {
 
   private String getKeyFor(Method method) {
     /* handle special methods */
-    if (VALUE_METHOD_NAME.equals(method.getName())) {
+    if (SPECIAL_METHOD_VALUE.equals(method.getName())) {
       return null;
     }
     /* check for our Key annotation first */
