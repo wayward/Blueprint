@@ -82,7 +82,6 @@ public interface TestConfiguration {
   @UseType(_Protocol.class)
   Map<String, _Protocol> protocols();
   interface _Protocol {
-    String $value();
     String name();
     int port();
   }
@@ -117,10 +116,10 @@ public interface TestConfiguration {
   and runtime type hint trumps both.  Note, though, that no matter which type is
   determined to be the final required type for deserialization, it still has to be a
   subclass of the declaring method's return type. */
-  A hi1(Class<? extends A>... typeHint);
+  A typeHintDemo1(Class<? extends A>... typeHint);
 
   @UseType(A1.class)
-  A hi2(Class<? extends A>... typeHint);
+  A typeHintDemo2(Class<? extends A>... typeHint);
 
   /* Hierarchical configuration is specified by having the method declare a return type
   which is neither a collection nor a map.  That type is reified using the same mechanism

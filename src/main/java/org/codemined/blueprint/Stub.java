@@ -70,10 +70,6 @@ import java.util.Map;
  */
 class Stub<I> implements InvocationHandler {
 
-  private final String SPECIAL_METHOD_VALUE = "$value";
-
-  private final String SPECIAL_METHOD_COLLECTION = "$asMap";
-
   private final Class<I> iface;
 
   private final Tree<String,String> cfg;
@@ -181,9 +177,9 @@ class Stub<I> implements InvocationHandler {
 
   private String getKeyFor(Method method) {
     /* handle special methods */
-    if (SPECIAL_METHOD_VALUE.equals(method.getName())) {
-      return null;
-    }
+    //if ("$value".equals(method.getName())) {
+    //  return null;
+    //}
     /* check for our Key annotation first */
     Key keyAnn = method.getAnnotation(Key.class);
     if (keyAnn != null) {

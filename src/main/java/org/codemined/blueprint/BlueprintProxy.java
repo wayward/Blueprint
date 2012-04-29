@@ -17,7 +17,7 @@
 package org.codemined.blueprint;
 
 /**
- * All instances of objects created by Blueprint always implement this interface.
+ * Proxy classes instantiated by Blueprint implement this interface.
  * 
  * @author Zoran Rilak
  * @version 0.1

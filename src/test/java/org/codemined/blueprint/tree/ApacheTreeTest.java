@@ -22,7 +22,6 @@ import org.codemined.blueprint.impl.ApacheTree;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
@@ -35,13 +34,13 @@ import static org.testng.Assert.assertTrue;
 public class ApacheTreeTest {
 
   private static final String TEST_PROPERTIES_FILE = "src/test/resources/test.properties";
+
   private TestProperties testProperties;
 
   @BeforeClass
   public void setUp()
           throws IOException {
-    this.testProperties = new TestProperties();
-    this.testProperties.load(new FileInputStream(TEST_PROPERTIES_FILE));
+    this.testProperties = new TestProperties(TEST_PROPERTIES_FILE);
   }
 
   @Test

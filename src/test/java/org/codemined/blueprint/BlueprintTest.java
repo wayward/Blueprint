@@ -19,9 +19,12 @@ package org.codemined.blueprint;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.impl.ApacheTree;
+import org.codemined.blueprint.tree.TestProperties;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
@@ -34,6 +37,17 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
+  private static final String TEST_PROPERTIES_FILE = "src/test/resources/test.properties";
+
+  private TestProperties testProperties;
+
+  @BeforeClass
+  public void setUp()
+          throws IOException {
+    this.testProperties = new TestProperties(TEST_PROPERTIES_FILE);
+  }
+
+  @Test
   public TestConfiguration createTestBlueprint() {
     try {
       PropertiesConfiguration pc = new PropertiesConfiguration("src/test/resources/test.properties");
@@ -122,15 +136,15 @@ public class BlueprintTest {
   public void typeHintPrecedence()
           throws MalformedURLException {
     TestConfiguration cfg = createTestBlueprint();
-    assertEquals(cfg.hi1().getClass(), A.class);
-    assertEquals(cfg.hi1().toString(), "1:A");
-    assertEquals(cfg.hi1(A1.class).getClass(), A1.class);
-    assertEquals(cfg.hi1(A1.class).toString(), "1:A1:A");
+    assertEquals(cfg.typeHintDemo1().getClass(), A.class);
+    assertEquals(cfg.typeHintDemo1().toString(), "1:A");
+    assertEquals(cfg.typeHintDemo1(A1.class).getClass(), A1.class);
+    assertEquals(cfg.typeHintDemo1(A1.class).toString(), "1:A1:A");
 
-    assertEquals(cfg.hi2().getClass(), A1.class);
-    assertEquals(cfg.hi2().toString(), "2:A1:A");
-    assertEquals(cfg.hi2(A2.class).getClass(), A2.class);
-    assertEquals(cfg.hi2(A2.class).toString(), "2:A2:A1:A");
+    assertEquals(cfg.typeHintDemo2().getClass(), A1.class);
+    assertEquals(cfg.typeHintDemo2().toString(), "2:A1:A");
+    assertEquals(cfg.typeHintDemo2(A2.class).getClass(), A2.class);
+    assertEquals(cfg.typeHintDemo2(A2.class).toString(), "2:A2:A1:A");
   }
 
   @Test
@@ -155,10 +169,4 @@ public class BlueprintTest {
     assertTrue(cfg.keyTwo());
   }
 
-  @Test
-  public void specialValueMethod() {
-    TestConfiguration cfg = createTestBlueprint();
-    assertEquals(cfg.protocols().get("telnet").$value(), "enabled");
-  }
-  
 }

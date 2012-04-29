@@ -16,6 +16,8 @@
 
 package org.codemined.blueprint.tree;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -24,6 +26,22 @@ import java.util.Set;
  * @author Zoran Rilak
  */
 public class TestProperties extends Properties {
+
+  public TestProperties(String fileName)
+          throws IOException {
+    super();
+    FileInputStream fos = null;
+    try {
+      fos = new FileInputStream(fileName);
+      super.load(fos);
+    } finally {
+      if (fos != null) {
+        try {
+          fos.close();
+        } catch (IOException ignored) {}
+      }
+    }
+  }
 
   public Set<String> firstLevelKeys() {
     Set<String> keys = new HashSet<String>();
