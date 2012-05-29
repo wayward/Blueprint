@@ -36,9 +36,9 @@
     </licenses>
 
     <scm>
-        <url>scm:git:https://github.com/wayward/Blueprint</url>
-        <connection>scm:git:git@github.com:wayward/Blueprint.git</connection>
-        <developerConnection>scm:git:git@github.com:wayward/Blueprint.git</developerConnection>
+        <connection>scm:git:git://github.com/wayward/Blueprint.git</connection>
+        <developerConnection>scm:git:git://github.com/wayward/Blueprint.git</developerConnection>
+        <url>git@github.com:wayward/Blueprint.git</url>
     </scm>
 
     <developers>
