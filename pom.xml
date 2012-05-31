@@ -22,10 +22,15 @@
     <artifactId>blueprint</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-
     <name>Blueprint</name>
     <description>Type-safe configuration framework for Java</description>
     <url>http://maven.apache.org</url>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+	<version>7</version>
+    </parent>
 
     <licenses>
         <license>

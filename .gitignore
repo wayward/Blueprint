@@ -1,5 +1,6 @@
 # Common fluff
 *~
+release.properties
 
 # Compiled classes, artifacts, etc.
 target/
@@ -7,3 +8,4 @@ target/
 # IDE files
 .idea/
 blueprint.iml
+
