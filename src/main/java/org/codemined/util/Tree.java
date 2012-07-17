@@ -14,19 +14,43 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint;
+package org.codemined.util;
 
-import org.codemined.Path;
-
-import java.util.Arrays;
+import java.util.List;
 
 /**
+ * An immutable N-ary tree.
+ * 
  * @author Zoran Rilak
  */
-public class ConfigPath extends Path<String> {
+public interface Tree<K,V> extends Iterable<Tree<K,V>> {
 
-  public ConfigPath(String[] keys) {
-    super(Arrays.asList(keys));
-  }
+  K key();
+
+  V value();
+
+  Tree<K,V> parent();
+
+  List<K> path();
+
+  Tree<K,V> get(K subKey);
+
+  Tree<K,V> getByPath(List<K> path);
+
+  boolean contains(K subKey);
+
+  Tree<K,V> put(K subKey, V value);
+
+  Tree<K,V> putByPath(List<K> path, V value);
+
+  Tree<K,V> putByPath(List<K> path, V intermediaryValue, V value);
+
+  /**
+   * <p>Returns the number of sub-trees.</p>
+   *
+   * @return
+   */
+  int size();
 
 }
+

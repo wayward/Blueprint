@@ -16,8 +16,8 @@
 
 package org.codemined.blueprint.tree;
 
-import org.codemined.InMemoryTree;
-import org.codemined.Tree;
+import org.codemined.util.InMemoryTree;
+import org.codemined.util.Tree;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -34,13 +34,13 @@ public class InMemoryTreeTest {
   @Test
   public void buildsEmptyPaths() {
     Tree<String,String> t = new InMemoryTree<String,String>(null);
-    t.put(Arrays.asList("a", "b", "c"), "abc");
-    assertNotNull(t.get(Arrays.asList("a")));
-    assertNotNull(t.get(Arrays.asList("a", "b")));
-    assertNotNull(t.get(Arrays.asList("a", "b", "c")));
-    assertEquals(t.get(Arrays.asList("a")).value(), null);
-    assertEquals(t.get(Arrays.asList("a", "b")).value(), null);
-    assertEquals(t.get(Arrays.asList("a", "b", "c")).value(), "abc");
+    t.putByPath(Arrays.asList("a", "b", "c"), "abc");
+    assertNotNull(t.getByPath(Arrays.asList("a")));
+    assertNotNull(t.getByPath(Arrays.asList("a", "b")));
+    assertNotNull(t.getByPath(Arrays.asList("a", "b", "c")));
+    assertEquals(t.getByPath(Arrays.asList("a")).value(), null);
+    assertEquals(t.getByPath(Arrays.asList("a", "b")).value(), null);
+    assertEquals(t.getByPath(Arrays.asList("a", "b", "c")).value(), "abc");
   }
   
 }

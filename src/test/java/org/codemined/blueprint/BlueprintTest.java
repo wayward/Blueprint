@@ -37,23 +37,25 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-  private static final String TEST_PROPERTIES_FILE = "src/test/resources/test.properties";
+  private static final String VALID_CONF = "src/test/resources/test.properties";
+
+  private static final String INVALID_CONF = "src/test/resources/test-failing-validations.properties";
 
   private TestProperties testProperties;
 
   @BeforeClass
   public void setUp()
           throws IOException {
-    this.testProperties = new TestProperties(TEST_PROPERTIES_FILE);
+    this.testProperties = new TestProperties(VALID_CONF);
   }
 
   @Test
   public TestConfiguration createTestBlueprint() {
     try {
-      PropertiesConfiguration pc = new PropertiesConfiguration("src/test/resources/test.properties");
+      PropertiesConfiguration pc = new PropertiesConfiguration(VALID_CONF);
       pc.setDelimiterParsingDisabled(true);
       pc.refresh();
-      return Blueprint.createBlueprint(TestConfiguration.class, new ApacheTree(pc));
+      return Blueprint.create(TestConfiguration.class, new ApacheTree(pc));
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
@@ -66,10 +68,10 @@ public class BlueprintTest {
   @Test
   public void validationFails() {
     try {
-      PropertiesConfiguration pc = new PropertiesConfiguration("src/test/resources/test-failing-validations.properties");
+      PropertiesConfiguration pc = new PropertiesConfiguration(INVALID_CONF);
       pc.setDelimiterParsingDisabled(true);
       pc.refresh();
-      Blueprint.createBlueprint(TestConfiguration.class, new ApacheTree(pc));
+      Blueprint.create(TestConfiguration.class, new ApacheTree(pc));
       fail();
 
     } catch (ConfigurationException e) {

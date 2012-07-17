@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined;
+package org.codemined.util;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,7 +49,7 @@ public abstract class AbstractTree<K,V> implements Tree<K,V> {
   }
 
   @Override
-  public Tree<K,V> get(List<K> path) {
+  public Tree<K,V> getByPath(List<K> path) {
     Tree<K,V> t = this;
     for (K key : path) {
       Tree<K,V> next = t.get(key);
@@ -62,12 +62,12 @@ public abstract class AbstractTree<K,V> implements Tree<K,V> {
   }
 
   @Override
-  public Tree<K,V> put(List<K> path, V value) {
-    return put(path, null, value);
+  public Tree<K,V> putByPath(List<K> path, V value) {
+    return putByPath(path, null, value);
   }
 
   @Override
-  public Tree<K,V> put(List<K> path, V intermediaryValue, V value) {
+  public Tree<K,V> putByPath(List<K> path, V intermediaryValue, V value) {
     Tree<K,V> t = this;
     Iterator<K> iter = path.iterator();
     while (iter.hasNext()) {

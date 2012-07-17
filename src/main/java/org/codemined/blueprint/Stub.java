@@ -26,7 +26,7 @@ package org.codemined.blueprint;
  - Stub caching strategy might be configurable if we allow the configurations to change
    (but keep validations in mind: do we re-run them, and if so, when?) */
 
-import org.codemined.Tree;
+import org.codemined.util.Tree;
 
 import javax.inject.Named;
 import java.lang.reflect.InvocationHandler;

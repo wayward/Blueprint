@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint.util;
 
+import org.codemined.util.Strings;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -26,52 +27,52 @@ import static org.testng.Assert.assertEquals;
  * @author Zoran Rilak
  */
 @Test
-public class StringUtilsTest {
+public class StringsTest {
   
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void splitNullString() {
-    StringUtils.split(null, "foo");
+    Strings.split(null, "foo");
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void splitWithNullSeparator() {
-    StringUtils.split("foo", null);
+    Strings.split("foo", null);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void splitWithEmptySeparator() {
-    StringUtils.split("foo", "");
+    Strings.split("foo", "");
   }
 
   @Test
   public void splitEmptyString() {
-    assertEquals(StringUtils.split("", ".").size(), 1);
+    assertEquals(Strings.split("", ".").size(), 1);
   }
   
   @Test
   public void splitSeparatorOnlyString() {
-    assertEquals(StringUtils.split(".", ".").size(), 0);
-    assertEquals(StringUtils.split("..", ".").size(), 0);
+    assertEquals(Strings.split(".", ".").size(), 0);
+    assertEquals(Strings.split("..", ".").size(), 0);
   }
   
   @Test
   public void split() {
-    List<String> l = StringUtils.split("a.b..c.d", ".");
+    List<String> l = Strings.split("a.b..c.d", ".");
     assertEquals(l.size(), 5);
     assertEquals(l.get(2), "");
   }
   
   @Test
   public void joinEmptyStrings() {
-    assertEquals(StringUtils.join("."), "");
-    assertEquals(StringUtils.join(".", ""), "");
-    assertEquals(StringUtils.join(".", "", null), "");
-    assertEquals(StringUtils.join(".", "", null, "", null), "");
+    assertEquals(Strings.join("."), "");
+    assertEquals(Strings.join(".", ""), "");
+    assertEquals(Strings.join(".", "", null), "");
+    assertEquals(Strings.join(".", "", null, "", null), "");
   }
 
   @Test
   public void joinWithEmptyStrings() {
-    assertEquals(StringUtils.join(".", null, "", null, "a", "b", "", "c", "d"), "a.b..c.d");
+    assertEquals(Strings.join(".", null, "", null, "a", "b", "", "c", "d"), "a.b..c.d");
   }
 
   

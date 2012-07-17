@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint.util;
+package org.codemined.util;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * @author Zoran Rilak
  */
-public class StringUtils {
+public class Strings {
 
 
   public static List<String> split(String str, String separator) {

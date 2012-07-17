@@ -16,7 +16,7 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.Tree;
+import org.codemined.util.Tree;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

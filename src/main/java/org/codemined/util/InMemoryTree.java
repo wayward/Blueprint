@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined;
+package org.codemined.util;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -16,7 +16,7 @@
 
 package org.codemined.blueprint.tree;
 
-import org.codemined.InMemoryTree;
+import org.codemined.util.InMemoryTree;
 
 /**
 * @author Zoran Rilak

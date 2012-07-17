@@ -16,7 +16,7 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.Tree;
+import org.codemined.util.Tree;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.method.MethodConstraintViolation;
 import org.hibernate.validator.method.MethodValidator;
@@ -28,7 +28,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * Creates a blueprint file from a configuration source.
+ * Creates a blueprint object from an interface and a configuration source.
  * 
  * @author Zoran Rilak
  */
@@ -47,7 +47,7 @@ public class Blueprint {
    * @return an object of {@code iface}, stubbed to return reified values from the configuration. 
    * @throws InvalidConfigurationException in case of errors
    */
-  public static <T> T createBlueprint(Class<T> iface, Tree<String, String> tree)
+  public static <T> T create(Class<T> iface, Tree<String, String> tree)
           throws InvalidConfigurationException {
     if (!iface.isInterface()) {
       throw new IllegalArgumentException(
@@ -90,7 +90,7 @@ public class Blueprint {
       }
 
       if (failedValidations.size() > 0) {
-        throw new InvalidConfigurationException("There's a problem with the configuration.",
+        throw new InvalidConfigurationException("The configuration has failed to validate.",
                 failedValidations);
       }
 

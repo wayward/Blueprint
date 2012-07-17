@@ -17,4 +17,5 @@ public class UseTypeTest {
         // no-op
       }});
   }
+
 }

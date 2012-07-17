@@ -8,7 +8,6 @@ import static org.testng.Assert.assertEquals;
 public class TypeUtilTest {
 
   public void testAllPrimitives() {
-    // I believe Guava has a Primitives class that knows how to do this.
     assertEquals(Byte.class, TypeUtil.deprimitivize(byte.class));
     assertEquals(Short.class, TypeUtil.deprimitivize(short.class));
     assertEquals(Integer.class, TypeUtil.deprimitivize(int.class));

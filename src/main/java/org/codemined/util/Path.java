@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined;
+package org.codemined.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,10 +47,10 @@ public class Path<K> extends ArrayList<K> {
   
   @SuppressWarnings("unchecked")
   public Path<K> to(K subKey) {
-    return through(subKey);
+    return via(subKey);
   }
 
-  public Path<K> through(K... subKeys) {
+  public Path<K> via(K... subKeys) {
     if (subKeys == null) {
       return this;
     }

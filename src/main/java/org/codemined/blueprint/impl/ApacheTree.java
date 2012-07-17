@@ -18,8 +18,8 @@ package org.codemined.blueprint.impl;
 
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
-import org.codemined.InMemoryTree;
-import org.codemined.blueprint.util.StringUtils;
+import org.codemined.util.InMemoryTree;
+import org.codemined.util.Strings;
 
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +31,7 @@ public class ApacheTree extends InMemoryTree<String,String> {
 
   private final CompositeConfiguration config;
 
-  /** Apache Configuration key corresponding to this tree.  For the root tree, contains empty string (""). */
+  /** Apache Configuration key corresponding to this tree.  Root tree contains an empty string (""). */
   private final String configKey;
 
 
@@ -54,14 +54,14 @@ public class ApacheTree extends InMemoryTree<String,String> {
     if (parent == null) {
       this.configKey = "";
     } else {
-      this.configKey = StringUtils.join(".", parent.configKey, key);
+      this.configKey = Strings.join(".", parent.configKey, key);
     }
   }
 
 
   @Override
   public String value() {
-    // values aren't cached to allow the changes to the underlying Apache Configuration to show through.
+    // values aren't cached to allow the changes in the underlying Apache Configuration to show through.
     return config.getString(configKey);
   }
 
@@ -73,7 +73,7 @@ public class ApacheTree extends InMemoryTree<String,String> {
 
 
   @Override
-  public ApacheTree put(List<String> path, String value) {
+  public ApacheTree putByPath(List<String> path, String value) {
     throw new UnsupportedOperationException("Modifying Apache Configuration trees is not supported");
   }
 
