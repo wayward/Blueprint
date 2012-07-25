@@ -81,7 +81,7 @@ class Stub<I> implements InvocationHandler {
   private final I proxy;
 
 
-  public Stub(Class<I> iface, Tree configTree, Deserializer deserializer) {
+  public Stub(Class<I> iface, Tree<String,String> configTree, Deserializer deserializer) {
     this.iface = iface;
     this.cfg = configTree;
     this.deserializer = deserializer;

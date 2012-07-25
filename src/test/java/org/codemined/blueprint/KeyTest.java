@@ -2,7 +2,7 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import org.codemined.blueprint.tree.TestTree;
+import org.codemined.util.tree.TestTree;
 import org.testng.annotations.Test;
 
 import javax.inject.Named;

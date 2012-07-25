@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint.tree;
+package org.codemined.util.tree;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -21,10 +21,6 @@ package org.codemined.blueprint;
  */
 public class BlueprintException extends RuntimeException {
 
-  public BlueprintException() {
-    super();
-  }
-
   public BlueprintException(String message) {
     super(message);
   }

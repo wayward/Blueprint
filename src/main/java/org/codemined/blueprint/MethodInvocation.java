@@ -16,6 +16,8 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.util.TypeUtil;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -84,15 +86,8 @@ class MethodInvocation {
       return NO_ARGS;
     }
     /* unwrap single vararg array */
-    if (args[0] instanceof Class[] && args.length == 1) {
-      args = (Object[]) args[0];
-    }
-    /* ensure that the blueprint method call semantic has been observed */
-    if (args.length > 1) {
-      throw new BlueprintException("Blueprint methods may only take one optional type hint argument");
-    }
-    if (args.length == 1 && !(args[0] instanceof Class)) {
-      throw new BlueprintException("Optional type hint argument must be an instance of Class");
+    if (args[0] instanceof Object[] && args.length == 1) {
+      return (Object[]) args[0];
     }
     return args;
   }
@@ -123,7 +118,12 @@ class MethodInvocation {
   }
 
 
+  /**
+   * Ensures that Blueprint method call semantic has been observed.
+   * @return class passed as the runtime type hint or null
+   */
   private Class<?> getRuntimeTypeHint0() {
+    /* ensure that the blueprint method call semantic has been observed */
     switch (args.length) {
       case 0:
         return null;

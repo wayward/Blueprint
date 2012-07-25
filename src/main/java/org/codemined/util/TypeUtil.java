@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint;
+package org.codemined.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.Map;
  * 
  * @author Zoran Rilak
  */
-class TypeUtil {
+public class TypeUtil {
   private static final Map<Class<?>, Class<?>> primitiveTable;
 
 
@@ -45,6 +45,7 @@ class TypeUtil {
    * 
    *  @param type may be null
    */
+  @SuppressWarnings("unchecked")
   public static <T> Class<T> deprimitivize(Class<?> type) {
     if (type == null) {
       return null;
@@ -52,9 +53,7 @@ class TypeUtil {
     if (type.isPrimitive()) {
       type = primitiveTable.get(type);
     }
-    @SuppressWarnings("unchecked")  // it came from the primitives table, it must be typesafe.
-    Class<T> returnType = (Class<T>) type;
-    return returnType;
+    return (Class<T>) type;
   }
 
 }

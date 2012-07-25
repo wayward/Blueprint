@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
  * @author Zoran Rilak
@@ -29,10 +30,43 @@ import static org.testng.Assert.assertEquals;
 public class MethodInvocationTest {
 
   interface I {
+    void noArg();
+    void varArg(String... str);
+    void complexArgs(int foo, char... bar);
     int intMethod_noHints();
     int intMethod_paramHint(Class<?> hint);
     @UseType(byte.class) int intMethod_annHint();
     @UseType(byte.class) int intMethod_annAndArgHint(Class<?> hint);
+  }
+
+  @Test
+  public void handlesNoArgMethods()
+          throws NoSuchMethodException {
+    Method m = I.class.getMethod("noArg");
+    MethodInvocation inv = new MethodInvocation(m, null);
+    assertNull(inv.getHintedType());
+  }
+
+  @Test
+  public void handlesVarargHints()
+          throws NoSuchMethodException {
+    Method m = I.class.getMethod("varArg", String[].class);
+    MethodInvocation inv = new MethodInvocation(m, new Object[][] { new Object[] { String.class }});
+    assertEquals(inv.getHintedType(), String.class);
+  }
+
+  @Test(expectedExceptions = BlueprintException.class)
+  public void rejectsNonClassVararg()
+          throws NoSuchMethodException {
+    Method m = I.class.getMethod("varArg", String[].class);
+    new MethodInvocation(m, new Object[][] { new Object[] { "foo" }});
+  }
+
+  @Test(expectedExceptions = BlueprintException.class)
+  public void rejectsComplexMethodSignatures()
+          throws NoSuchMethodException {
+    Method m = I.class.getMethod("complexArgs", int.class, char[].class);
+    new MethodInvocation(m, new Object[] { 1, new char[] { 'a', 'b' } });
   }
 
   @Test

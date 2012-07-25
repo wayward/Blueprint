@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint.util;
+package org.codemined.util;
 
-import org.codemined.util.Strings;
 import org.testng.annotations.Test;
 
 import java.util.List;

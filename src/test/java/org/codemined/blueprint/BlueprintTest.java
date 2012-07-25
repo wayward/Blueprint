@@ -19,7 +19,7 @@ package org.codemined.blueprint;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.impl.ApacheTree;
-import org.codemined.blueprint.tree.TestProperties;
+import org.codemined.util.tree.TestProperties;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -59,10 +59,21 @@ public class BlueprintTest {
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
-
     } catch (InvalidConfigurationException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void rejectsClasses()
+          throws ConfigurationException, InvalidConfigurationException {
+    Blueprint.create(Class.class, new ApacheTree(new PropertiesConfiguration(VALID_CONF)));
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void rejectsNullConfigurationTrees()
+          throws InvalidConfigurationException {
+    Blueprint.create(TestConfiguration.class, null);
   }
 
   @Test
@@ -135,6 +146,7 @@ public class BlueprintTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void typeHintPrecedence()
           throws MalformedURLException {
     TestConfiguration cfg = createTestBlueprint();

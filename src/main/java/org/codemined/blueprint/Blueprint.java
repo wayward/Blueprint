@@ -49,9 +49,12 @@ public class Blueprint {
    */
   public static <T> T create(Class<T> iface, Tree<String, String> tree)
           throws InvalidConfigurationException {
-    if (!iface.isInterface()) {
+    if (! iface.isInterface()) {
       throw new IllegalArgumentException(
               "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
+    }
+    if (tree == null) {
+      throw new IllegalArgumentException("Null configuration tree");
     }
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader());
