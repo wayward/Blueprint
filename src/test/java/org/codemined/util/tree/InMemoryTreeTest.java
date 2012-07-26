@@ -34,6 +34,17 @@ import static org.testng.Assert.*;
 public class InMemoryTreeTest {
 
   @Test
+  public void gettersAndSetters() {
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>(null, 1, "one");
+    assertEquals(t.getKey(), new Integer(1));
+    assertEquals(t.getValue(), "one");
+    t.setKey(2);
+    t.setValue("two");
+    assertEquals(t.getKey(), new Integer(2));
+    assertEquals(t.getValue(), "two");
+  }
+
+  @Test
   public void buildsEmptyPaths() {
     Tree<String,String> t = new InMemoryTree<String,String>(null);
     t.putByPath(Arrays.asList("a", "b", "c"), "abc");
@@ -65,6 +76,7 @@ public class InMemoryTreeTest {
     t.put(2, "TWO!");
     Tree<Integer,String> st1 = t.get(2);
     Tree<Integer,String> st2 = t.put(2, "two");
+    assertTrue(t.contains(2));
     assertEquals(t.get(2).getValue(), "two");
     assertSame(st1, st2);
   }
@@ -73,6 +85,7 @@ public class InMemoryTreeTest {
   public void putNonexisting() {
     Tree<Integer,String> t = new InMemoryTree<Integer,String>(null, 1, "one");
     t.put(2, "two");
+    assertTrue(t.contains(2));
     assertSame(t.get(2).getParent(), t);
     assertEquals(t.get(2).getValue(), "two");
   }
@@ -98,14 +111,16 @@ public class InMemoryTreeTest {
   }
 
   @Test
-  public void gettersAndSetters() {
+  public void correctSize() {
     Tree<Integer,String> t = new InMemoryTree<Integer,String>(null, 1, "one");
-    assertEquals(t.getKey(), new Integer(1));
-    assertEquals(t.getValue(), "one");
-    t.setKey(2);
-    t.setValue("two");
-    assertEquals(t.getKey(), new Integer(2));
-    assertEquals(t.getValue(), "two");
+    assertEquals(t.size(), 0);
+    t.put(2, "two");
+    t.put(3, "three");
+    t.put(4, "four");
+    t.put(5, "five");
+    assertEquals(t.size(), 4);
+    t.put(2, "TWO!");
+    assertEquals(t.size(), 4);
   }
 
 }

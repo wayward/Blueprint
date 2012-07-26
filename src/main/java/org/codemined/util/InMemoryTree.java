@@ -97,24 +97,7 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
 
   @Override
   public Iterator<Tree<K,V>> iterator() {
-    final Iterator<Tree<K,V>> iter = subTrees.values().iterator();
-
-    return new Iterator<Tree<K,V>>() {
-      @Override
-      public boolean hasNext() {
-        return iter.hasNext();
-      }
-
-      @Override
-      public Tree<K, V> next() {
-        return iter.next();
-      }
-
-      @Override
-      public void remove() {
-        iter.remove();
-      }
-    };
+    return new SubTreeIterator();
   }
 
   @Override
@@ -127,6 +110,34 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
 
   protected Tree<K,V> add(Tree<K,V> subTree) {
     return subTrees.put(subTree.getKey(), subTree);
+  }
+
+
+  /* Privates ------------------------------------------------------- */
+
+  class SubTreeIterator implements Iterator<Tree<K,V>> {
+
+    private Iterator<Tree<K, V>> iter;
+
+    public SubTreeIterator() {
+      this.iter = subTrees.values().iterator();
+    }
+
+    @Override
+    public boolean hasNext() {
+      return iter.hasNext();
+    }
+
+    @Override
+    public Tree<K, V> next() {
+      return iter.next();
+    }
+
+    @Override
+    public void remove() {
+      iter.remove();
+    }
+
   }
 
 }
