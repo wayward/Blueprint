@@ -35,64 +35,71 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
 
   private V value;
 
-  private HashMap<K,InMemoryTree<K,V>> subtrees;
+  private HashMap<K,Tree<K,V>> subTrees;
 
 
   public InMemoryTree(Tree<K,V> parent) {
-    this(null, null, parent);
+    this(parent, null, null);
   }
 
-
-  public InMemoryTree(K key, V value, Tree<K,V> parent) {
+  public InMemoryTree(Tree<K,V> parent, K key, V value) {
     super(parent);
     this.key = key;
     this.value = value;
-    this.subtrees = new HashMap<K,InMemoryTree<K,V>>();
+    this.subTrees = new HashMap<K,Tree<K,V>>();
   }
 
-
   @Override
-  public K key() {
+  public K getKey() {
     return key;
   }
 
-
-  public V value() {
+  public V getValue() {
     return value;
   }
 
-
   @Override
   public Tree<K,V> get(K subKey) {
-    return subtrees.get(subKey);
+    return subTrees.get(subKey);
   }
-
 
   @Override
   public Tree<K,V> put(K subKey, V value) {
-    InMemoryTree<K,V> t = subtrees.get(subKey);
+    Tree<K,V> t = subTrees.get(subKey);
     if (t == null) {
-      t = new InMemoryTree<K,V>(subKey, value, this);
-      subtrees.put(subKey, t);
+      t = new InMemoryTree<K,V>(this, subKey, value);
+      subTrees.put(subKey, t);
     } else {
       t.setValue(value);
     }
     return t;
   }
 
+  @Override
+  public Tree<K,V> put(Tree<K,V> subTree) {
+    return subTrees.put(subTree.getKey(), subTree);
+  }
+
+  @Override
+  public void setKey(K key) {
+    this.key = key;
+  }
+
+  @Override
+  public void setValue(V value) {
+    this.value = value;
+  }
 
   @Override
   public boolean contains(K subKey) {
-    return subtrees.containsKey(subKey);
+    return subTrees.containsKey(subKey);
   }
-
 
   @Override
   public Iterator<Tree<K,V>> iterator() {
-    final Iterator<InMemoryTree<K,V>> iter = subtrees.values().iterator();
+    final Iterator<Tree<K,V>> iter = subTrees.values().iterator();
 
     return new Iterator<Tree<K,V>>() {
-
       @Override
       public boolean hasNext() {
         return iter.hasNext();
@@ -110,27 +117,16 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
     };
   }
 
-
   @Override
   public int size() {
-    return subtrees.size();
+    return subTrees.size();
   }
 
 
   /* Protected methods ---------------------------------------------- */
 
-  protected InMemoryTree<K,V> add(InMemoryTree<K,V> subTree) {
-    return subtrees.put(subTree.key(), subTree);
-  }
-
-
-  protected void setKey(K key) {
-    this.key = key;
-  }
-
-
-  protected void setValue(V value) {
-    this.value = value;
+  protected Tree<K,V> add(Tree<K,V> subTree) {
+    return subTrees.put(subTree.getKey(), subTree);
   }
 
 }

@@ -59,4 +59,15 @@ public class Path<K> extends ArrayList<K> {
     return newPath;
   }
 
+  @Override
+  public String toString() {
+    ArrayList<String> l = new ArrayList<String>(this.size());
+    for (K k : this) {
+      l.add(k.toString());
+    }
+    return Strings.join("/", l);
+  }
+
+  /* equals(Object) and hashCode() from ArrayList behave as required for Path, too. */
+
 }

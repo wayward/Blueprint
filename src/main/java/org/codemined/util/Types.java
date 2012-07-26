@@ -24,7 +24,7 @@ import java.util.Map;
  * 
  * @author Zoran Rilak
  */
-public class TypeUtil {
+public class Types {
   private static final Map<Class<?>, Class<?>> primitiveTable;
 
 

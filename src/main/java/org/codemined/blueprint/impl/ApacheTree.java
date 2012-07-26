@@ -49,7 +49,7 @@ public class ApacheTree extends InMemoryTree<String,String> {
 
 
   protected ApacheTree(ApacheTree parent, String key, CompositeConfiguration config) {
-    super(key, null, parent);
+    super(parent, key, null);
     this.config = config;
     if (parent == null) {
       this.configKey = "";
@@ -60,7 +60,7 @@ public class ApacheTree extends InMemoryTree<String,String> {
 
 
   @Override
-  public String value() {
+  public String getValue() {
     // values aren't cached to allow the changes in the underlying Apache Configuration to show through.
     return config.getString(configKey);
   }

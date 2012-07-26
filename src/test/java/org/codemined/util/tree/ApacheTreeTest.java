@@ -58,8 +58,8 @@ public class ApacheTreeTest {
   @Test
   public void validRootNode() {
     ApacheTree t = loadTree();
-    assertEquals(t.key(), null);
-    assertEquals(t.value(), null);
+    assertEquals(t.getKey(), null);
+    assertEquals(t.getValue(), null);
     assertEquals(t.size(), 14);
   }
 

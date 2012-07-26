@@ -16,7 +16,7 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.util.TypeUtil;
+import org.codemined.util.Types;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -45,8 +45,8 @@ class MethodInvocation {
   public MethodInvocation(Method method, Object[] args) {
     this.method = method;
     this.args = unwrapRuntimeArguments(args);
-    this.returnType = TypeUtil.deprimitivize(method.getReturnType());
-    this.hintedType = TypeUtil.deprimitivize(getHintedType0());
+    this.returnType = Types.deprimitivize(method.getReturnType());
+    this.hintedType = Types.deprimitivize(getHintedType0());
   }
 
 

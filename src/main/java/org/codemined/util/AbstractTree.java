@@ -32,19 +32,19 @@ public abstract class AbstractTree<K,V> implements Tree<K,V> {
   }
 
   @Override
-  public Tree<K,V> parent() {
+  public Tree<K,V> getParent() {
     return parent;
   }
 
   @Override
-  public List<K> path() {
+  public List<K> getPath() {
     List<K> path;
-    if (parent() != null) {
-      path = parent().path();
+    if (getParent() != null) {
+      path = getParent().getPath();
     } else {
       path = new LinkedList<K>();
     }
-    path.add(key());
+    path.add(getKey());
     return path;
   }
 
@@ -63,19 +63,20 @@ public abstract class AbstractTree<K,V> implements Tree<K,V> {
 
   @Override
   public Tree<K,V> putByPath(List<K> path, V value) {
-    return putByPath(path, null, value);
+    return putByPath(path, value, null);
   }
 
   @Override
-  public Tree<K,V> putByPath(List<K> path, V intermediaryValue, V value) {
+  public Tree<K,V> putByPath(List<K> path, V value, V intermediaryValue) {
     Tree<K,V> t = this;
     Iterator<K> iter = path.iterator();
     while (iter.hasNext()) {
       K k = iter.next();
       Tree<K,V> next = t.get(k);
       if (next == null) {
-        t = t.put(k, iter.hasNext() ? intermediaryValue : value);
+        next = t.put(k, iter.hasNext() ? intermediaryValue : value);
       }
+      t = next;
     }
     return t;
   }

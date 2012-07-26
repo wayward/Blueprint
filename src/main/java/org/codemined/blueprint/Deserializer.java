@@ -103,7 +103,7 @@ class Deserializer {
     final Map<String, E> targetMap = Reifier.reifyStringMap();
     for (Tree<String,String> subTree : tree) {
       final E element = deserialize(elementType, null, subTree);
-      targetMap.put(subTree.key(), element);
+      targetMap.put(subTree.getKey(), element);
     }
     return targetMap;
   }
@@ -111,7 +111,7 @@ class Deserializer {
 
   private <E> Collection<E> deserializeCollection(Class<?> type, Class<E> elementType, Tree<String,String> tree) {
     final Collection<E> targetCollection = Reifier.reifyCollection(type);
-    String[] elements = tree.value().split("[,\\s]");  // comma and whitespace
+    String[] elements = tree.getValue().split("[,\\s]");  // comma and whitespace
     for (String e : elements) {
       targetCollection.add(deserializeSimpleTypeFromValue(elementType, e));
     }
@@ -134,7 +134,7 @@ class Deserializer {
   @SuppressWarnings("unchecked")
   private <T> T deserializeClass(Tree<String,String> tree) {
     try {
-      return (T) classLoader.loadClass(tree.value());
+      return (T) classLoader.loadClass(tree.getValue());
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
@@ -142,7 +142,7 @@ class Deserializer {
 
 
   private <T> T deserializeSimpleType(Class<T> type, Tree<String,String> tree) {
-    return deserializeSimpleTypeFromValue(type, tree.value());
+    return deserializeSimpleTypeFromValue(type, tree.getValue());
   }
 
   private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {

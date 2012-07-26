@@ -25,13 +25,13 @@ import java.util.List;
  */
 public interface Tree<K,V> extends Iterable<Tree<K,V>> {
 
-  K key();
+  K getKey();
 
-  V value();
+  V getValue();
 
-  Tree<K,V> parent();
+  Tree<K,V> getParent();
 
-  List<K> path();
+  List<K> getPath();
 
   Tree<K,V> get(K subKey);
 
@@ -39,18 +39,35 @@ public interface Tree<K,V> extends Iterable<Tree<K,V>> {
 
   boolean contains(K subKey);
 
+  public void setKey(K key);
+
+  public void setValue(V value);
+
+  /**
+   * Sets the value in a sub-tree, possibly generating a new sub-tree if one doesn't exist.
+   *
+   * @return the updated or newly created sub-tree.
+   */
   Tree<K,V> put(K subKey, V value);
+
+  /**
+   * Adds a sub-tree to this tree.
+   *
+   * @param subTree sub-tree to add.
+   * @return the previous sub-tree associated with the given
+   * sub-tree's key, or null if there was no such sub-tree.
+   */
+  Tree<K,V> put(Tree<K,V> subTree);
 
   Tree<K,V> putByPath(List<K> path, V value);
 
   Tree<K,V> putByPath(List<K> path, V intermediaryValue, V value);
 
   /**
-   * <p>Returns the number of sub-trees.</p>
+   * <p>Returns the number of sub-trees contained in this tree.</p>
    *
-   * @return
+   * @return number of sub-trees.
    */
   int size();
 
 }
-

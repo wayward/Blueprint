@@ -2,7 +2,7 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import org.codemined.util.tree.TestTree;
+import org.codemined.util.AbstractTree;
 import org.testng.annotations.Test;
 
 import javax.inject.Named;
@@ -27,15 +27,14 @@ public class KeyTest {
     @Key("keyOverride") @Named("namedOverride") int bothOverrideMethod();
   }
 
-  @Mocked
-  TestTree mockTree;
+  @Mocked AbstractTree<String,String> mockTree;
 
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
       mockTree.get("keyOverride"); result = mockTree;
-      mockTree.value(); result = "42";
+      mockTree.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
     Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
@@ -49,7 +48,7 @@ public class KeyTest {
           throws Throwable {
     new Expectations() {{
       mockTree.get("namedOverride"); result = mockTree;
-      mockTree.value(); result = "42";
+      mockTree.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
     Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
@@ -63,7 +62,7 @@ public class KeyTest {
           throws Throwable {
     new Expectations() {{
       mockTree.get("keyOverride"); result = mockTree;
-      mockTree.value(); result = "42";
+      mockTree.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
     Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, deserializer);
