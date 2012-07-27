@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Represents an invocation of a method from a Blueprint target interface.
+ * Represents an invocation of a method from a Blueprint interface.
  *
  * @author Zoran Rilak
  * @version 0.1
