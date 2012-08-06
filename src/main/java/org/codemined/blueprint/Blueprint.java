@@ -45,16 +45,13 @@ public class Blueprint {
    * @param iface the interface for configuration access.
    * @param tree configuration tree
    * @return an object of {@code iface}, stubbed to return reified values from the configuration. 
-   * @throws InvalidConfigurationException in case of errors
+   * @throws ConfigurationValidationException in case of errors
    */
   public static <T> T create(Class<T> iface, Tree<String, String> tree)
-          throws InvalidConfigurationException {
+          throws ConfigurationValidationException {
     if (! iface.isInterface()) {
-      throw new IllegalArgumentException(
-              "Blueprints must be constructed from interfaces.  Not an interface: " + iface);
-    }
-    if (tree == null) {
-      throw new IllegalArgumentException("Null configuration tree");
+      throw new IllegalArgumentException("Blueprints must be constructed from interfaces." +
+              "  Not an interface: " + iface);
     }
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader());
@@ -70,7 +67,7 @@ public class Blueprint {
 
 
   private static <T> void validate(Class<T> iface, T blueprint) 
-          throws InvalidConfigurationException {
+          throws ConfigurationValidationException {
     LinkedList<String> failedValidations = new LinkedList<String>();
 
     try {
@@ -93,7 +90,7 @@ public class Blueprint {
       }
 
       if (failedValidations.size() > 0) {
-        throw new InvalidConfigurationException("The configuration has failed to validate.",
+        throw new ConfigurationValidationException("The configuration has failed to validate.",
                 failedValidations);
       }
 

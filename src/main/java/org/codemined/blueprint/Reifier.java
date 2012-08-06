@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -23,23 +24,37 @@ import java.util.*;
  */
 public class Reifier {
 
-  public static <E> Collection<E> reifyCollection(Class<?> type) {
-    if (! type.isInterface()) {
-      throw new BlueprintException("Only interfaces can be reified");
+  @SuppressWarnings("unchecked")
+  public static <E> Collection<E> reifyCollection(Class<? extends Collection> type) {
+    if (! Collection.class.isAssignableFrom(type)) {
+      throw new BlueprintException("Type is not a Collection: " + type);
     }
 
-    if (type.isAssignableFrom(LinkedList.class)) {
-      return new LinkedList<E>();
-    }
-    if (type.isAssignableFrom(TreeSet.class)) {
-      return new TreeSet<E>();
-    }
+    if (type.isInterface()) {
+      if (type.isAssignableFrom(LinkedList.class)) {
+        return new LinkedList<E>();
+      }
+      if (type.isAssignableFrom(TreeSet.class)) {
+        return new TreeSet<E>();
+      }
+      throw new BlueprintException("Don't know how to reify " + type);
 
-    throw new BlueprintException("Don't know how to reify " + type);
+    } else if (! Modifier.isAbstract(type.getModifiers())) {
+      try {
+        return (Collection<E>) type.newInstance();
+      } catch (Exception e) {
+        throw new BlueprintException("Failed to reify " + type, e);
+      }
+
+    } else {
+      throw new BlueprintException("Only interfaces and concrete classes can be reified." +
+              "  Not an interface nor a concrete class: " + type);
+    }
   }
 
   public static <E> Map<String, E> reifyStringMap() {
     return new HashMap<String, E>();
   }
+
 
 }

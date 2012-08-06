@@ -60,7 +60,7 @@ public class ApacheTreeTest {
     ApacheTree t = loadTree();
     assertEquals(t.getKey(), null);
     assertEquals(t.getValue(), null);
-    assertEquals(t.size(), 14);
+    assertEquals(t.size(), 15);
   }
 
   @Test

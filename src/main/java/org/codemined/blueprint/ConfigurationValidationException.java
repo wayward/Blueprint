@@ -19,12 +19,15 @@ package org.codemined.blueprint;
 import java.util.List;
 
 /**
+ * Thrown to indicate that the configuration does not meet validate
+ * against the constraints specified on the methods of the interface.
+ *
  * @author Zoran Rilak
  */
-public class InvalidConfigurationException extends Exception {
+public class ConfigurationValidationException extends Exception {
   private final List<String> failedValidations;
 
-  public InvalidConfigurationException(String message, List<String> failedValidations) {
+  public ConfigurationValidationException(String message, List<String> failedValidations) {
     super(message);
     this.failedValidations = failedValidations;
   }

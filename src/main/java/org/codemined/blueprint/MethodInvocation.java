@@ -22,7 +22,21 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Represents an invocation of a method from a Blueprint interface.
+ * Class MethodInvocation represents an invocation of a method from a blueprint interface.
+ * <p>
+ *   Such an invocation can range from being very simple, in case of methods without type hints,
+ *   to complex, for methods with both @UseType and runtime type hints.  MethodInvocation
+ *   captures all type hints recognized by Blueprint and calculates the final hinted type.
+ * </p>
+ *
+ * <p>
+ *   This class will observe Blueprint hinting conventions but will otherwise not check for
+ *   assignment compatibility between the method's declared return type and its hinted type.
+ *   This check is performed by the deserializer, which might decide to use type hint in a
+ *   different way (for example, as a collection element type rather than the type of the object
+ *   returned).
+ * </p>
+ *
  *
  * @author Zoran Rilak
  * @version 0.1
@@ -30,18 +44,34 @@ import java.util.Arrays;
  */
 class MethodInvocation {
 
+  /** Stand-in for null argument list of no-args methods. */
   private static final Object[] NO_ARGS = new Object[] {};
 
-  /* Java reflection object representing the method being called. */
+  /** Java reflection object representing the method being called. */
   private final Method method;
 
-  /* A (potentially empty) array of arguments passed to the method when called. */
+  /** A (potentially empty) array of arguments passed to the method when called. */
   private final Object[] args;
 
+  /** Method's declared return type. */
   private final Class<?> returnType;
 
+  /** Method's calculated hinted return type or null if no type hinting is used. */
   private final Class<?> hintedType;
 
+  /**
+   * Creates a new MethodInvocation object from a method object and its runtime arguments.
+   * <p>
+   *   This constructor will enforce Blueprint method calling conventions; namely:
+   *   <ul>
+   *     <li>methods can take up to one argument, either as a fixed or a vararg parameter;</li>
+   *     <li>if given, argument must be an instance of java.lang.Class;</li>
+   *     <li>when determining the final hinted type, arguments take precedence over @UseType.</li>
+   *   </ul>
+   * </p>
+   * @param method the method being called.
+   * @param args runtime arguments passed in the method call.
+   */
   public MethodInvocation(Method method, Object[] args) {
     this.method = method;
     this.args = unwrapRuntimeArguments(args);
@@ -50,11 +80,26 @@ class MethodInvocation {
   }
 
 
+  /**
+   * Gets the method's declared returned value.
+   *
+   * @return method's declared return value.
+   */
   public Class<?> getReturnType() {
     return returnType;
   }
 
 
+  /**
+   * Gets the method's calculated type hint.
+   * <p>
+   *   Type hint is a class object passed to the method as an argument at runtime or specified
+   *   in the {@link UseType} annotation.  When determining the final type to be used as a
+   *   type hint, runtime argument will take precedence over the type given by the annotation.
+   * </p>
+   *
+   * @return method's calculated type hint or null if none given.
+   */
   public Class<?> getHintedType() {
     return hintedType;
   }
@@ -80,6 +125,13 @@ class MethodInvocation {
 
   /* Privates ------------------------------------------------------- */
 
+  /**
+   * Flattens the argument array if it consists of a single array element.
+   * Also returns an empty array for a null argument.
+   *
+   * @param args argument array to unwrap.
+   * @return a (possibly empty) array of arguments.
+   */
   private Object[] unwrapRuntimeArguments(Object[] args) {
     /* promote a null argument list into an empty array */
     if (args == null) {
@@ -93,22 +145,29 @@ class MethodInvocation {
   }
 
 
+  /**
+   * Gets the class to use as a type hint, observing rules of precedence.
+   *
+   * @return class to use as a type hint or null if none given.
+   */
   private Class<?> getHintedType0() {
     Class<?> hintedType;
 
+    /* Apply type hint rules, observing precedence */
     hintedType = getRuntimeTypeHint0();
-    if (hintedType != null) {
-      return getRuntimeTypeHint0();
-    }
-    hintedType = getAnnotationTypeHint0();
-    if (hintedType != null) {
-      return hintedType;
+    if (hintedType == null) {
+      hintedType = getAnnotationTypeHint0();
     }
 
-    return null;
+    return hintedType;
   }
 
 
+  /**
+   * Gets the type hint specified in the {@link UseType} annotation.
+   *
+   * @return class object or null.
+   */
   private Class<?> getAnnotationTypeHint0() {
     UseType ann = method.getAnnotation(UseType.class);
     if (ann != null) {
@@ -119,8 +178,9 @@ class MethodInvocation {
 
 
   /**
-   * Ensures that Blueprint method call semantic has been observed.
-   * @return class passed as the runtime type hint or null
+   * Gets the type hint specified as a value of an argument at the time of invocation.
+   *
+   * @return class object or null.
    */
   private Class<?> getRuntimeTypeHint0() {
     /* ensure that the blueprint method call semantic has been observed */

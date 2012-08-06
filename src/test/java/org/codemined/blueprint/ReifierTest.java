@@ -16,16 +16,11 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.util.Tree;
 import org.testng.annotations.Test;
 
-import java.util.AbstractList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author Zoran Rilak
@@ -34,15 +29,25 @@ import static org.testng.Assert.fail;
 public class ReifierTest {
 
 
-  public void wontReifyClasses() {
+  interface ACollectionInterface extends Collection { }
+
+
+  @Test(expectedExceptions = BlueprintException.class)
+  public void wontReifyUnknownInterfaces() {
+    Reifier.reifyCollection(ACollectionInterface.class);
+  }
+
+  @Test(expectedExceptions = BlueprintException.class)
+  public void wontReifyAbstractCollectionClasses() {
+    Reifier.reifyCollection(AbstractCollection.class);
+  }
+
+  public void reifiesConcreteCollectionClasses() {
     try {
-      Reifier.reifyCollection(Class.class);
+      assertEquals(Reifier.reifyCollection(ArrayList.class).getClass(), ArrayList.class);
+    } catch (BlueprintException e) {
       fail();
-    } catch (BlueprintException ignored) {}
-    try {
-      Reifier.reifyCollection(AbstractList.class);
-      fail();
-    } catch (BlueprintException ignored) {}
+    }
   }
 
   public void reifiesListInterface() {
@@ -51,11 +56,6 @@ public class ReifierTest {
 
   public void reifiesSetInterface() {
     assertTrue(Reifier.reifyCollection(Set.class) instanceof Set);
-  }
-
-  @Test(expectedExceptions = BlueprintException.class)
-  public void failsForUnknownTypes() {
-    Reifier.reifyCollection(Tree.class);
   }
 
   public void reifiesStringMap() {

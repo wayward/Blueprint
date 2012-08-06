@@ -17,6 +17,25 @@
 package org.codemined.blueprint;
 
 /**
+ * Thrown to indicate [...]
+ *
+ * BlueprintException: unchecked; thrown if:
+ *   - method with >1 argument (CT)
+ *   - map w/o type hint (CT - creation time)
+ *   - collection w/o type hint (CT)
+ *   - incompatible type hint (CT if no RTT hints used, RT for RTT hints)
+ *   - class not found (CT)
+ *   - deserialization method not found (CT)
+ *   - deserialization method threw an exception (CT if no RTT hints used, RT for RTT hints)
+ *   - RTT not a class (RT)
+ * - Reifier
+ *   - attempting to reify a non-interface (@ creation time)
+ *   - interface cannot be reified (@ creation time)
+ * - Stub
+ *   - Blueprint internal error (@ creation time)
+ *   - invocation failed: configuration key missing, deserialization failed (@ creation time & runtime)
+ *     => IOException
+ *
  * @author Zoran Rilak
  */
 public class BlueprintException extends RuntimeException {

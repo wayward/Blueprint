@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import static org.testng.Assert.*;
@@ -59,21 +60,15 @@ public class BlueprintTest {
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
-    } catch (InvalidConfigurationException e) {
+    } catch (ConfigurationValidationException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void rejectsClasses()
-          throws ConfigurationException, InvalidConfigurationException {
+          throws ConfigurationException, ConfigurationValidationException {
     Blueprint.create(Class.class, new ApacheTree(new PropertiesConfiguration(VALID_CONF)));
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void rejectsNullConfigurationTrees()
-          throws InvalidConfigurationException {
-    Blueprint.create(TestConfiguration.class, null);
   }
 
   @Test
@@ -88,7 +83,7 @@ public class BlueprintTest {
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
 
-    } catch (InvalidConfigurationException e) {
+    } catch (ConfigurationValidationException e) {
       assertEquals(e.getFailedValidations().size(), 1);
     }
   }
@@ -121,6 +116,11 @@ public class BlueprintTest {
     assertEquals(iter.next().intValue(), 3);
     assertEquals(iter.next().intValue(), 8);
     assertEquals(iter.next().intValue(), 18);
+
+    assertEquals(cfg.activeBackupDays().getClass(), ArrayList.class);
+    assertEquals(cfg.activeBackupDays().size(), 7);
+    assertEquals(cfg.activeBackupDays().get(0), true);
+    assertEquals(cfg.activeBackupDays().get(1), false);
   }
 
   @Test
@@ -143,6 +143,7 @@ public class BlueprintTest {
     assertEquals(cfg.state(TestConfiguration._State.class), TestConfiguration._State.TRUE);
     assertEquals(cfg.deployUrl().getClass(), URL.class);
     assertEquals(cfg.deployUrl(), new URL("http://www.codemined.org/Blueprint"));
+    cfg.deployUrl().getHost();
   }
 
   @Test

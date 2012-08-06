@@ -23,16 +23,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * @author Zoran Rilak
  */
 class Deserializer {
 
-  /* keep `valueOf' last so that we can circumvent this very common
-  static method with a custom one from among those above it.
-  Very useful for e.g. case-insensitive deserialization of enums. */
+  /* keep `valueOf' last to allow overriding it.
+  ValueOf is the standard name for a deserializer method in JRE, but we sometimes want to
+  supply our own method to convert Strings into instances of our type. One example would be
+  deserializing Enums.  Enum.valueOf() recognized only uppercase Enum constants; by adding a
+  static method called "fromString", "parse", or "deserialize" to our Enum class, we can
+  supply custom deserialization logic. */
   private static final String[] STATIC_DESERIALIZER_METHODS = {
           "fromString",
           "parse",
@@ -49,9 +51,9 @@ class Deserializer {
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(Class<T> returnType, Class hintedType, Tree<String,String> tree) {
+  public <T> T deserialize(Class<?> returnType, Class<?> hintedType, Tree<String,String> tree) {
 
-    /* Maps and collections require type hint to determine the element type. */
+    /* Maps and collections require a type hint to use as element type. */
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a type hint");
@@ -63,7 +65,7 @@ class Deserializer {
       if (hintedType == null) {
         throw new BlueprintException("Collections require a type hint");
       }
-      return (T) deserializeCollection(returnType, hintedType, tree);
+      return (T) deserializeCollection((Class<Collection>)returnType, hintedType, tree);
     }
 
     /* Other (non-map, non-collection) return types will be superseded by the
@@ -79,28 +81,28 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      return deserializeInterface(returnType, tree);
+      return (T) deserializeInterface(returnType, tree);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
-      return deserializeClass(tree);
+      return (T) deserializeClass(tree);
     }
 
     /* if no special handling applies, deserialize as a simple type
     (through a static factory method or String ctor) */
-    return deserializeSimpleType(returnType, tree);
+    return (T) deserializeSimpleType(returnType, tree);
   }
 
 
   /**
    *
-   * @param elementType
-   * @param tree
-   * @param <E>
-   * @return
+   * @param elementType Type of values stored in the map.
+   * @param tree Configuration tree to deserialize from.
+   * @param <E> Element type.
+   * @return Deserialized instance of the given map type.
    */
-  public <E> Map<String, E> deserializeMap(Class<E> elementType, Tree<String,String> tree) {
-    final Map<String, E> targetMap = Reifier.reifyStringMap();
+  public <E> Map<String,E> deserializeMap(Class<E> elementType, Tree<String,String> tree) {
+    final Map<String,E> targetMap = Reifier.reifyStringMap();
     for (Tree<String,String> subTree : tree) {
       final E element = deserialize(elementType, null, subTree);
       targetMap.put(subTree.getKey(), element);
@@ -109,84 +111,159 @@ class Deserializer {
   }
 
 
-  private <E> Collection<E> deserializeCollection(Class<?> type, Class<E> elementType, Tree<String,String> tree) {
-    final Collection<E> targetCollection = Reifier.reifyCollection(type);
-    String[] elements = tree.getValue().split("[,\\s]");  // comma and whitespace
-    for (String e : elements) {
-      targetCollection.add(deserializeSimpleTypeFromValue(elementType, e));
+  /**
+   *
+   * @param type Collection type to deserialize to.
+   * @param elementType Type of elements contained in the collection.
+   * @param tree Configuration tree to deserialize from.
+   * @param <E> Element type.
+   * @return Deserialized collection.
+   */
+  @SuppressWarnings("unchecked")
+  private <E, T extends Collection<E>> T deserializeCollection(Class<T> type,
+                                                            Class<E> elementType,
+                                                            Tree<String,String> tree) {
+    final T targetCollection = (T) Reifier.reifyCollection(type);
+    // split at commas, ignoring whitespace (multiple commas yield empty elements)
+    //TODO provide for custom list splitters (although this is going to be OK 99% of the time)
+    String[] elements = tree.getValue().split("\\s*,\\s*");
+    for (String eStr : elements) {
+      E element = deserializeSimpleTypeFromValue(elementType, eStr);
+      targetCollection.add(element);
     }
     return targetCollection;
   }
 
 
+  /**
+   *
+   * @param type Interface to deserialize to.
+   * @param tree Configuration tree to deserialize from.
+   * @param <T> Interface type.
+   * @return Deserialized instance of the given interface type.
+   */
   private <T> T deserializeInterface(Class<T> type, Tree<String,String> tree) {
-    // TODO will need a better way to determine which classloader to use for child deserializers
-    // TODO won't work for intermediary, nonexistent nodes (i.e. when a.b.c exists but a.b does not)
     return new Stub<T>(type, tree, this).getProxy();
   }
 
 
   /**
-   * @param tree
-   * @param <T>
-   * @return
+   * @param tree Configuration tree to deserialize from.
+   * @return Deserialized class object.
    */
-  @SuppressWarnings("unchecked")
-  private <T> T deserializeClass(Tree<String,String> tree) {
+  private Class<?> deserializeClass(Tree<String,String> tree) {
     try {
-      return (T) classLoader.loadClass(tree.getValue());
+      return classLoader.loadClass(tree.getValue());
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
   }
 
-
+  /**
+   *
+   * @param type Simple type to deserialize to.
+   * @param tree Configuration tree to deserialize from.
+   * @param <T> Simple type (primitive, boxed or String).
+   * @return Deserialized instance of a simple type.
+   */
   private <T> T deserializeSimpleType(Class<T> type, Tree<String,String> tree) {
     return deserializeSimpleTypeFromValue(type, tree.getValue());
   }
 
+
+  /**
+   *
+   * @param type Simple type (String, primitive or boxed) to deserialize to.
+   * @param value String to deserialize from.
+   * @param <T> Simple type (primitive, boxed or String).
+   * @return Deserialized instance of a simple type.
+   */
   private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {
-    T o;
+    T obj;
     for (String methodName : STATIC_DESERIALIZER_METHODS) {
-      o = useStaticDeserializer(type, methodName, value);
-      if (o != null) {
-        return o;
+      obj = useStaticDeserializer(type, methodName, value);
+      if (obj != null) {
+        return obj;
       }
     }
-    o = useConstructorDeserializer(type, value);
-    if (o != null) {
-      return o;
+    obj = useConstructorDeserializer(type, value);
+    if (obj != null) {
+      return obj;
     }
 
     throw new BlueprintException("No appropriate deserialization method found" +
             " for type " + type.getName());
   }
 
+  /**
+   * Attempts to deserialize an object using a static factory method.
+   * <p>
+   *   The type is queried for a method that meets the following criteria:
+   *   <ul>
+   *     <li>is public and static;</li>
+   *     <li>has the name {@code methodName};</li>
+   *     <li>takes one String parameter;</li>
+   *     <li>{@code type} is assignable from this method's return type, as per {@link Class#isAssignableFrom(Class)}.</li>
+   *   </ul>
+   *   If no such method is found, useStaticDeserializer returns null.
+   * </p>
+   * @param type Type to deserialize into.
+   * @param methodName Name of the static factory method to use.
+   * @param value String to deserialize from.
+   * @param <T> Type to deserialize into.
+   * @return Deserialized instance or null if no adequate method is found.
+   * @throws BlueprintException if an exception is thrown from inside the deserializer method.
+   */
   private <T> T useStaticDeserializer(Class<T> type, String methodName, String value) {
+    Method method;
+
     try {
-      Method method = type.getMethod(methodName, String.class);
-      if (Modifier.isStatic(method.getModifiers()) &&
-              type.isAssignableFrom(method.getReturnType())) {
-        return type.cast(method.invoke(null, value));
+      method = type.getMethod(methodName, String.class);
+      if (! Modifier.isStatic(method.getModifiers()) ||
+              ! type.isAssignableFrom(method.getReturnType())) {
+        return null;
       }
-      throw new NoSuchElementException();
     } catch (NoSuchMethodException e) {
       return null;
+    }
+
+    try {
+      return type.cast(method.invoke(null, value));
     } catch (Exception e) {
       throw new BlueprintException("Failed to deserialize configuration item" +
               " as an instance of " + type.getCanonicalName() +
               ", using method " + methodName + "(String)" +
               ", from value \"" + value + "\"", e);
-    }
+      }
   }
 
 
+  /**
+   * Attempts to deserialize an object using the String constructor.
+   * <p>
+   *   The type is queried for a constructor that meets the following criteria:
+   *   <ul>
+   *     <li>is public;</li>
+   *     <li>takes one String parameter.</li>
+   *   </ul>
+   *   If no such constructor is found, useConstructorDeserializer returns null.
+   * </p>
+   * @param type Type to deserialize into.
+   * @param value String to deserialize from.
+   * @param <T> Type to deserialize into.
+   * @return Deserialized instance or null if no adequate constructor is found.
+   * @throws BlueprintException if an exception is thrown from inside the constructor.
+   */
   private <T> T useConstructorDeserializer(Class<T> type, String value) {
+    Constructor<T> ctor;
     try {
-      Constructor<T> ctor = type.getConstructor(String.class);
-      return ctor.newInstance(value);
+      ctor = type.getConstructor(String.class);
     } catch (NoSuchMethodException e) {
       return null;
+    }
+
+    try {
+      return ctor.newInstance(value);
     } catch (Exception e) {
       throw new BlueprintException("Failed to deserialize configuration item" +
               " as an instance of " + type.getCanonicalName() +

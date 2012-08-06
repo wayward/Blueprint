@@ -106,7 +106,7 @@ class Stub<I> implements InvocationHandler {
 
     final String key = getKeyFor(method);
     try {
-      // Values are cached by (method, args) pairs to support type hinting in arguments.
+      // Values are cached by (method, args) pairs to support runtime type hints.
       MethodInvocation invocation = new MethodInvocation(method, args);
       Object o = cache.get(invocation);
       if (o == null) {
@@ -132,7 +132,11 @@ class Stub<I> implements InvocationHandler {
       return o;
       
     } catch (BlueprintException e) {
-      throw new BlueprintException(buildExceptionMessage(e.getMessage(), method, args), e);
+      throw new BlueprintException(String.format("%s, in method %s%s, class %s",
+              e.getMessage(),
+              method.getName(),
+              args == null ? "[]" : Arrays.asList(args),
+              iface.getName()));
     }
   }
 
@@ -167,10 +171,10 @@ class Stub<I> implements InvocationHandler {
     try {
       return iface.cast(Proxy.newProxyInstance(
               iface.getClassLoader(), new Class[]{ iface, BlueprintProxy.class }, this));
-    } catch (IllegalArgumentException e) {
-      throw new BlueprintException("Error creating proxy instance for " + iface.getName(), e);
     } catch (ClassCastException e) {
       throw new BlueprintException("Error casting proxy instance to " + iface.getName(), e);
+    } catch (IllegalArgumentException e) {
+      throw new BlueprintException("Error creating proxy instance for " + iface.getName(), e);
     }
   }
 
@@ -192,15 +196,6 @@ class Stub<I> implements InvocationHandler {
     }
     /* no overrides -- return the method's name */
     return method.getName();
-  }
-
-
-  private String buildExceptionMessage(String cause, Method method, Object... args) {
-    return String.format("%s, in method %s%s, class %s",
-            cause,
-            method.getName(),
-            args == null ? "[]" : Arrays.asList(args),
-            iface.getName());
   }
 
 }

@@ -21,6 +21,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,13 +69,15 @@ public interface TestConfiguration {
   at runtime. */
   <T> List<T> backupHours(Class<T> elementType);
 
-
   /* If including a runtime argument is not feasible nor desired, type hinting
   can also be done by annotating the method with @UseType().  Type hint provided
   in the annotation must be assignment-compatible with the method's return type. */
   @UseType(Integer.class)
   List<Integer> backupHours();
 
+  /* Concrete collection types can also be used. */
+  @UseType(Boolean.class)
+  ArrayList activeBackupDays();
 
   /* Maps, like collections, are read by type-hinting the desired element type,
    either at runtime or by annotating the method with @UseType(). */
@@ -82,7 +85,6 @@ public interface TestConfiguration {
 
   @UseType(String.class)
   Map<String, String> http();
-
 
   /* Hierarchical configurations are specified by having a method with a return type
   which is neither a collection nor a map.  That type is reified using the same
