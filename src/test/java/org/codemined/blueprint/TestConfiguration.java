@@ -123,24 +123,25 @@ public interface TestConfiguration {
 
   /* Sometimes we want to be flexible and have access to a configuration item
   in two or more "type flavors".  For example, if we have a configuration key
-  such as "remote.baseurl = http://foo:23/", is by its intended nature a URI,
-  but we might also want to access it as a simple String object
-  we're converting types to their String representations using toString(), but there are
-  situations when the conversion between a type known to the configuration and our
-  desired type isn't readily available.  As long as the types we need are those that
-  Blueprint knows how to deserialize from their common string representation, we can use
-  runtime type hinting to achieve the same effect while hiding all the boilerplate code.
-  Here, we can obtain the value of ``_state'' in three different types:
+  such as "remote.base_url = http://foo:23/", is by its intended nature a URI,
+  but we might also want to use it as a String, as stored in the configuration.
+  We can always call URI#toString(), but there are situations when this conversion
+  is "lossy" (i.e. parsing "000.001" to Double and back), or when we don't need
+  a String at all but something entirely different.
+  As long as the types we need are those that Blueprint knows how to deserialize
+  from their common string representation, we can use runtime type hinting to
+  achieve the same effect while hiding all the boilerplate code.
 
-    - cfg.<String>_state(String.class)  => String: "TRUE"
-    - cfg.<Boolean>_state(Boolean.class)  => boolean: true
-    - cfg.<_State>_State(_State.class)  => _State enum: _State.TRUE
+  As an example, we can obtain the value of ``_state'' in three different types:
+    String str   = cfg._state(String.class)   => String: "TRUE"
+    boolean bool = cfg._state(Boolean.class)  => boolean: true
+    _State state = cfg._State(_State.class)   => enum: _State.TRUE
 
-  Note, though, that methods using runtime type hinting cannot be pre-validated.
-  This may result in deserialization errors at the time of a method's invocation.
+  Note, though, that methods using runtime type hinting cannot be pre-validated,
+  hence using them may result in deserialization errors at the time of invocation.
   If that is the case, a BlueprintException will be thrown.  This is a compromise
-  between strict type checking and flexibility of use.  Of course, if you don't use
-  runtime type hints, no exceptions will be thrown during use. */
+  between strict type checking and flexibility.
+  Of course, if you don't use runtime type hints, no exceptions will be thrown. */
   <T> T state(Class<T> typeHint);
   enum _State {
     TRUE,
@@ -151,7 +152,7 @@ public interface TestConfiguration {
 
   /* Concrete return type, type hint annotation and runtime type hint can all be present
   simultaneously on a method.  Annotation takes precedence over the return type,
-  and runtime type hint trumps both.  Note, though, that no matter which type is
+  and a runtime type hint trumps both.  Note, though, that no matter which type is
   determined to be the final required type for deserialization, it still has to be a
   subclass of the declaring method's return type. */
   A typeHintDemo1(Class<? extends A>... typeHint);
