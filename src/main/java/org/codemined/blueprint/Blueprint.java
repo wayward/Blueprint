@@ -90,8 +90,7 @@ public class Blueprint {
       }
 
       if (failedValidations.size() > 0) {
-        throw new ConfigurationValidationException("The configuration has failed to validate.",
-                failedValidations);
+        throw new ConfigurationValidationException(failedValidations);
       }
 
     } catch (InvocationTargetException e) {

@@ -51,8 +51,7 @@ public class Strings {
 
     StringBuilder sb = new StringBuilder();
     Iterator<String> iter = components.iterator();
-    while (iter.hasNext()) {
-      String comp = iter.next();
+    for (String comp : components) {
       // skip null components
       if (comp == null) {
         continue;

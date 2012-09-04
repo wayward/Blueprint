@@ -19,12 +19,9 @@ package org.codemined.blueprint;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.impl.ApacheTree;
-import org.codemined.util.tree.TestProperties;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,14 +38,6 @@ public class BlueprintTest {
   private static final String VALID_CONF = "src/test/resources/test.properties";
 
   private static final String INVALID_CONF = "src/test/resources/test-failing-validations.properties";
-
-  private TestProperties testProperties;
-
-  @BeforeClass
-  public void setUp()
-          throws IOException {
-    this.testProperties = new TestProperties(VALID_CONF);
-  }
 
   @Test
   public TestConfiguration createTestBlueprint() {

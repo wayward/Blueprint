@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import static org.testng.Assert.*;
@@ -64,7 +63,7 @@ public class InMemoryTreeTest {
   }
 
   @Test
-  public void getNonexisting() {
+  public void getNonExisting() {
     Tree<Integer,String> t = new InMemoryTree<Integer,String>(null, 1, "one");
     t.put(2, "two");
     assertNull(t.get(3));
@@ -82,7 +81,7 @@ public class InMemoryTreeTest {
   }
 
   @Test
-  public void putNonexisting() {
+  public void putNonExisting() {
     Tree<Integer,String> t = new InMemoryTree<Integer,String>(null, 1, "one");
     t.put(2, "two");
     assertTrue(t.contains(2));
@@ -97,15 +96,15 @@ public class InMemoryTreeTest {
     t.put(3, "three");
     t.put(4, "four");
     t.put(5, "five");
+
     Set<String> set = new HashSet<String>();
     set.add("two");
     set.add("three");
     set.add("four");
     set.add("five");
-    Iterator<Tree<Integer,String>> iter = t.iterator();
-    while (iter.hasNext()) {
-      String s = iter.next().getValue();
-      assertTrue(set.remove(s));
+
+    for (Tree<Integer,String> subT : t) {
+      assertTrue(set.remove(subT.getValue()));
     }
     assertEquals(set.size(), 0);
   }

@@ -27,8 +27,8 @@ import java.util.List;
 public class ConfigurationValidationException extends Exception {
   private final List<String> failedValidations;
 
-  public ConfigurationValidationException(String message, List<String> failedValidations) {
-    super(message);
+  public ConfigurationValidationException(List<String> failedValidations) {
+    super();
     this.failedValidations = failedValidations;
   }
 

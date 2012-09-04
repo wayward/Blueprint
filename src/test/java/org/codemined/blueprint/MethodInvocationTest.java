@@ -103,7 +103,7 @@ public class MethodInvocationTest {
   void methodWithAnnotationHint()
           throws NoSuchMethodException {
     Method m = I.class.getMethod("intMethod_annHint");
-    MethodInvocation inv = new MethodInvocation(m, null);
+    new MethodInvocation(m, null);
 
   }
 
