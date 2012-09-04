@@ -1,7 +1,7 @@
 Blueprint: Type-Safe Configurations for Java
 =
 
-Blueprint is a simple framework which makes reading configuration files more enjoyable.
+Blueprint is a simple framework that makes reading configuration files more enjoyable.
 
 - The code resides [on GitHub](https://github.com/wayward/Blueprint).
 - There is also a small but attentive [mailing list](http://groups.google.com/group/blueprint-configuration).
@@ -17,7 +17,8 @@ Features
 The Problem of Reading Configuration Files
 -
 
-Configuration files are a common mainstay of many Java applications.  Some standard vessels in which configuration is held include:
+Configuration files are a common mainstay of many Java applications.
+Some standard vessels in which configuration is held include:
 
 - Java Properties format;
 - XML;
