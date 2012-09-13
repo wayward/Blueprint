@@ -32,7 +32,6 @@ import javax.inject.Named;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +69,13 @@ import java.util.Map;
  */
 class Stub<I> implements InvocationHandler {
 
+  static final ThreadLocal <Context> threadContext = new ThreadLocal<Context>() {
+    @Override
+    protected Context initialValue() {
+      return new Context();
+    }
+  };
+
   private final Class<I> iface;
 
   private final Tree<String,String> cfg;
@@ -82,6 +88,9 @@ class Stub<I> implements InvocationHandler {
 
 
   public Stub(Class<I> iface, Tree<String,String> configTree, Deserializer deserializer) {
+    if (configTree == null) {
+      throw new NullPointerException();
+    }
     this.iface = iface;
     this.cfg = configTree;
     this.deserializer = deserializer;
@@ -98,46 +107,38 @@ class Stub<I> implements InvocationHandler {
   /* Methods from InvocationHandler --------------------------------- */
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+  public Object invoke(Object proxy, Method method, Object[] argClasses) throws Throwable {
+    // mark the context in which we're going to execute
+    threadContext.get().setContext(method, argClasses, iface);
+
     // route methods not declared on the blueprint interface to self
     if (method.getDeclaringClass() == Object.class) {
-      return method.invoke(this, args);
+      return method.invoke(this, argClasses);
     }
 
     final String key = getKeyFor(method);
-    try {
-      // Values are cached by (method, args) pairs to support runtime type hints.
-      MethodInvocation invocation = new MethodInvocation(method, args);
-      Object o = cache.get(invocation);
-      if (o == null) {
-        // Get the tree whose value will be passed to the deserializer.
-        // For special methods ($value, $asMap etc.), use the tree associated with this stub
-        // instead of looking up children trees.
-        Tree<String,String> t;
-        if (key == null) {
-          t = cfg;
-        } else {
-          t = cfg.get(key);
-        }
-        if (t == null) {
-          throw new BlueprintException("Configuration key '" + key + "' does not exist" +
-                  " on path " + cfg.getPath() +
-                  ", for class " + iface.getCanonicalName() +
-                  ", method " + method.getName());
-        }
-
-        o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), t);
-        cache.put(invocation, o);
+    // Values are cached by (method, args) pairs to support runtime type hints.
+    MethodInvocation invocation = new MethodInvocation(method, argClasses);
+    Object o = cache.get(invocation);
+    if (o == null) {
+      // Get the tree whose value will be passed to the deserializer.
+      // For special methods ($value, $asMap), use the tree associated with this stub
+      // instead of looking up children trees.
+      Tree<String,String> t;
+      if (key == null) {
+        t = cfg;
+      } else {
+        t = cfg.get(key);
       }
-      return o;
-      
-    } catch (BlueprintException e) {
-      throw new BlueprintException(String.format("%s, in method %s%s, class %s",
-              e.getMessage(),
-              method.getName(),
-              args == null ? "[]" : Arrays.asList(args),
-              iface.getName()));
+      if (t == null) {
+        throw new CreationException("Configuration key '" + key +
+                "' does not exist on path " + cfg.getPath());
+      }
+
+      o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), t);
+      cache.put(invocation, o);
     }
+    return o;
   }
 
 

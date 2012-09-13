@@ -41,7 +41,7 @@ package org.codemined.blueprint;
 public class BlueprintException extends RuntimeException {
 
   public BlueprintException(String message) {
-    super(message);
+    super(Stub.threadContext.get().decorateException(message));
   }
 
   public BlueprintException(Throwable cause) {
@@ -49,7 +49,7 @@ public class BlueprintException extends RuntimeException {
   }
 
   public BlueprintException(String message, Throwable cause) {
-    super(message, cause);
+    super(Stub.threadContext.get().decorateException(message), cause);
   }
 
 }
