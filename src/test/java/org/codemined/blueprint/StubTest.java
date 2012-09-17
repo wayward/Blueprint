@@ -41,7 +41,7 @@ public class StubTest {
   private interface BlueprintIface extends ChildIface {
     int aMethod();
   }
-  
+
   @Test
   public void picksUpInheritedMethods()
           throws Throwable {

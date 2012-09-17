@@ -47,8 +47,8 @@ public class Reifier {
       }
 
     } else {
-      throw new BlueprintException("Only interfaces and concrete classes can be reified." +
-              "  Not an interface nor a concrete class: " + type);
+      throw new BlueprintException("Only interfaces and concrete classes can be reified, " +
+              "but " + type + " was given");
     }
   }
 

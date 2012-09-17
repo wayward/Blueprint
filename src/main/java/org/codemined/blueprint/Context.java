@@ -45,9 +45,10 @@ public class Context {
       argStr.add(o.toString());
     }
     return message +
-            ", in method " + getMethod()
+            " [in method " + getMethod().getName()
             + "(" + Strings.join(", ", argStr) + ")"
-            + ", for class " + getIface().getCanonicalName();
+            + ", for class " + getIface().getCanonicalName()
+            + "]";
   }
 
 }

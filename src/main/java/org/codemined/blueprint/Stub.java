@@ -131,7 +131,7 @@ class Stub<I> implements InvocationHandler {
         t = cfg.get(key);
       }
       if (t == null) {
-        throw new CreationException("Configuration key '" + key +
+        throw new BlueprintException("Configuration key '" + key +
                 "' does not exist on path " + cfg.getPath());
       }
 

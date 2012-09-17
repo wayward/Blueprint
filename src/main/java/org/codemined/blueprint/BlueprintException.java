@@ -16,6 +16,13 @@
 
 package org.codemined.blueprint;
 
+/*
+ BlueprintException:
+   - CreationException: blueprint class cannot be created
+   - ReadException: configuration cannot be read
+   - ValidationException: configuration is invalid
+ IllegalArgumentException during runtime for e.g. incorrect runtime hints.
+ */
 /**
  * Thrown to indicate [...]
  *
@@ -24,9 +31,9 @@ package org.codemined.blueprint;
  *   - map w/o type hint (CT - creation time)
  *   - collection w/o type hint (CT)
  *   - incompatible type hint (CT if no RTT hints used, RT for RTT hints)
- *   - class not found (CT)
  *   - deserialization method not found (CT)
  *   - deserialization method threw an exception (CT if no RTT hints used, RT for RTT hints)
+ *   - class not found (CT)
  *   - RTT not a class (RT)
  * - Reifier
  *   - attempting to reify a non-interface (@ creation time)

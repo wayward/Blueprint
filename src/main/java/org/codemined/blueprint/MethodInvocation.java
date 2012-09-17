@@ -189,7 +189,8 @@ class MethodInvocation {
         return null;
       case 1:
         if (! (args[0] instanceof Class)) {
-          throw new BlueprintException("Optional type hint argument must be an instance of Class");
+          throw new BlueprintException("Type hint must be a class, "
+                  + "but an instance of " + args[0].getClass().getName() + " was given");
         }
         return (Class<?>) args[0];
       default:
