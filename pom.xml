@@ -19,8 +19,8 @@
 
     <groupId>org.codemined</groupId>
     <artifactId>blueprint</artifactId>
-    <version>0.1</version>
-    <packaging>jar</packaging>
+    <version>0.2-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>Blueprint</name>
     <description>Type-safe configuration framework for Java</description>
     <url>http://maven.apache.org</url>
@@ -28,8 +28,13 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-	<version>7</version>
+        <version>7</version>
     </parent>
+
+    <modules>
+        <module>blueprint-core</module>
+        <module>blueprint-apache</module>
+    </modules>
 
     <licenses>
         <license>
@@ -123,38 +128,24 @@
         </plugins>
     </build>
 
-    <dependencies>
-        
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>4.2.0.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-            <version>1</version>
-            <optional>true</optional>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
 
-        <!-- Test scope dependencies -->
-        <dependency>
-            <groupId>com.googlecode.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>0.999.13</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.3.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+            <!-- Test scope dependencies -->
+            <dependency>
+                <groupId>com.googlecode.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>0.999.13</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.3.1</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
 
 </project>

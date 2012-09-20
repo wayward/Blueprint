@@ -7,5 +7,5 @@ target/
 
 # IDE files
 .idea/
-blueprint.iml
+*.iml
 
