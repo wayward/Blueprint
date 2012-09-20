@@ -89,27 +89,18 @@ contain in order to be considered valid.  For example:
     import javax.validation.constraints.*;
 
     interface ServerConfiguration {
-
-      @NotNull
-      URL proxyAddress();
-
-      @NotNull
-      File tmpDirectory();
-
+      @NotNull URL proxyAddress();
+      @NotNull File tmpDirectory();
       HTTP http();
 
       interface HTTP {
+        int port();
+        Connection connection();
 
-	int port();
-
-	Connection connection();
-
-	interface Connection {
-
-	  int connectTimeout();
-
-	  int readTimeout();
-	}
+        interface Connection {
+          int connectTimeout();
+          int readTimeout();
+        }
       }
     }
 
@@ -117,7 +108,7 @@ We then give this interface to Blueprint along with the appropriate configuratio
 object that does all the necessary conversions for us:
 
     ServerConfiguration cfg = Blueprint.createBlueprint(ServerConfiguration.class,
-	new ApacheConfigurationSource(new PropertiesConfiguration("conf/server.properties")));
+      new ApacheConfigurationSource(new PropertiesConfiguration("conf/server.properties")));
 
     cfg.proxyAddress();                     // => a java.net.URL object parsed from the "proxyAddress" key
     cfg.tmpDirectory();                     // => a java.io.File object parsed from the "tmpDirectory" key
