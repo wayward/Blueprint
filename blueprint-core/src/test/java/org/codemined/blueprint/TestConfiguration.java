@@ -16,9 +16,6 @@
 
 package org.codemined.blueprint;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,23 +42,8 @@ public interface TestConfiguration {
    */
   boolean isActive();
 
-  /* Blueprint can validate methods against any javax.validation.constraints.*
-   * annotations at the time the instance of your interface is created.
-   * If a return value of any such method fails to validate, a BlueprintException
-   * will be thrown to indicate that a valid blueprint cannot be created with the
-   * given combination of interface and configuration source.
-   */
-  @Min(0)
-  @Max(60)
   int timeout();
 
-  /* Configuration values can be made mandatory with @NotNull.
-   * If a method has not been annotated with @NotNull and the configuration does
-   * not contain a matching key-value pair, that method will simply return null.
-   * If the annotation is present, however, a BlueprintException will be thrown
-   * at creation time, much the same as above.
-   */
-  @NotNull
   File tempDir();
 
   /* URLs and URIs deserialize quite nicely.

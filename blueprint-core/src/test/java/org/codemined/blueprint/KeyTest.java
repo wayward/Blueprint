@@ -22,7 +22,6 @@ import org.codemined.util.AbstractTree;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
 
-import javax.inject.Named;
 import java.lang.reflect.Method;
 
 import static org.testng.Assert.assertEquals;
@@ -40,8 +39,6 @@ public class KeyTest {
   @SuppressWarnings("unused")
   private interface Iface {
     @Key("keyOverride") int keyOverridesMethod();
-    @Named("namedOverride") int namedOverridesMethod();
-    @Key("keyOverride") @Named("namedOverride") int bothOverrideMethod();
   }
 
   @Mocked AbstractTree<String,String> mockTree;
@@ -59,6 +56,9 @@ public class KeyTest {
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);
   }
+
+  /*
+   Support for javax.inject.Named is dropped for the time being.
 
   @Test
   public void namedAnnotationOverridesMapping()
@@ -87,5 +87,6 @@ public class KeyTest {
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);
   }
-  
+  */
+
 }

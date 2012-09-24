@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.util.InMemoryTree;
 import org.codemined.util.Tree;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,11 +35,7 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-  private static final String VALID_CONF = "src/test/resources/test.properties";
-
-  private static final String INVALID_CONF = "src/test/resources/test-failing-validations.properties";
-
-  private static final Tree<String, String> testTree = new TestTree();
+  private static final Tree<String, String> testTree = createTestTree();
 
 
   @Test
@@ -55,14 +52,6 @@ public class BlueprintTest {
   public void rejectsClasses()
           throws ConfigurationValidationException {
     Blueprint.create(Class.class, testTree);
-  }
-
-  @Test(expectedExceptions = ConfigurationValidationException.class)
-  public void validationFails()
-          throws ConfigurationValidationException {
-    TestTree failTree = new TestTree();
-    failTree.put("timeout", "61");
-    Blueprint.create(TestConfiguration.class, failTree);
   }
 
   @Test
@@ -161,4 +150,50 @@ public class BlueprintTest {
     assertTrue(cfg.keyTwo());
   }
 
+  /* Privates ------------------------------------------------------- */
+
+
+  private static Tree<String, String> createTestTree() {
+    InMemoryTree<String, String> t = new InMemoryTree<String, String>();
+    t.put("serviceName", "DummyService");
+    t.put("isActive", "true");
+    t.put("timeout", "15");
+    t.put("tempDir", "/tmp/blueprint");
+    t.put("deployUrl", "http://www.codemined.org/blueprint");
+    t.put("backupHours", "3,8,18");
+    t.put("activeBackupDays", "true, false, false, true, false, true, true");
+
+    Tree<String, String> http = t.put("http", null);
+    http.put("host", "localhost");
+    http.put("port", "65536");
+    http.put("ssl", "true");
+
+    Tree<String, String> proto = t.put("protocols", null);
+    Tree<String, String> telnet = proto.put("telnet", "disabled");
+    telnet.put("name", "Telnet");
+    telnet.put("port", "25");
+    Tree<String, String> ftp = proto.put("ftp", "enabled");
+    ftp.put("name", "FTP");
+    ftp.put("port", "21");
+    Tree<String, String> dns = proto.put("dns", "enabled");
+    dns.put("name", "DNS");
+    dns.put("port", "53");
+
+    t.put("state", "TRUE");
+    t.put("typeHintDemo1", "1");
+    t.put("typeHintDemo2", "2");
+
+    Tree<String, String> db = t.put("db", null);
+    db.put("impl", "java.util.Random");
+    Tree<String, String> devel = db.put("development", null);
+    devel.put("name", "devel");
+    devel.put("isTemporary", "true");
+    Tree<String, String> prod = db.put("production", null);
+    prod.put("name", "Production");
+    prod.put("isTemporary", "false");
+
+    t.put("key1", "true");
+    t.put("key2", "true");
+    return t;
+  }
 }

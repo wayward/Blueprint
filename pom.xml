@@ -33,6 +33,7 @@
 
     <modules>
         <module>blueprint-core</module>
+        <module>blueprint-validation</module>
         <module>blueprint-apache</module>
     </modules>
 

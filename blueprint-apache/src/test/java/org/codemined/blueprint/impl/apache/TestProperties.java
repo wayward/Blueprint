@@ -16,8 +16,8 @@
 
 package org.codemined.blueprint.impl.apache;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -30,14 +30,14 @@ public class TestProperties extends Properties {
   public TestProperties(String fileName)
           throws IOException {
     super();
-    FileInputStream fos = null;
+    InputStream is = null;
     try {
-      fos = new FileInputStream(fileName);
-      super.load(fos);
+      is = TestProperties.class.getClassLoader().getResourceAsStream(fileName);
+      super.load(is);
     } finally {
-      if (fos != null) {
+      if (is != null) {
         try {
-          fos.close();
+          is.close();
         } catch (IOException ignored) {}
       }
     }

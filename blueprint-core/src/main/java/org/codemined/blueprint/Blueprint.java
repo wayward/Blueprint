@@ -18,15 +18,8 @@ package org.codemined.blueprint;
 
 import org.codemined.util.Path;
 import org.codemined.util.Tree;
-import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.method.MethodConstraintViolation;
-import org.hibernate.validator.method.MethodValidator;
 
-import javax.validation.Validation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Creates a blueprint object from an interface and a configuration source.
@@ -34,84 +27,51 @@ import java.util.Set;
  * @author Zoran Rilak
  */
 public class Blueprint {
-  private static MethodValidator validator = Validation
-          .byProvider(HibernateValidator.class)
-          .configure()
-          .buildValidatorFactory()
-          .getValidator()
-          .unwrap(MethodValidator.class);
 
+  private static Validator validator = null;
+
+  static {
+    //=== Load the validation framework ===
+    try {
+      Class<?> clazz = Class.forName("org.codemined.blueprint.ValidatorImpl");
+      Blueprint.validator = (Validator) clazz.newInstance();
+
+    } catch (ClassNotFoundException ignored) {
+      // ClassNotFoundException means that the validation isn't loaded, so we'll pass
+    } catch (Exception e) {
+      // Any other exception is a problem with the framework
+      throw new ExceptionInInitializerError(e);
+    }
+  }
 
   /**
+   * Creates a blueprint object.
+   *
    * @param iface the interface for configuration access.
-   * @param tree configuration tree
-   * @return an object of {@code iface}, stubbed to return reified values from the configuration. 
-   * @throws ConfigurationValidationException in case of errors
+   * @param tree configuration tree.
+   * @return an instance implementing {@code iface} whose methods return values from the configuration.
+   * @throws ConfigurationValidationException if validation is loaded and the configuration fails to validate
+   * against {@code javax.validation.constraints.*} annotations present of {@code iface}'s methods.
    */
   public static <T> T create(Class<T> iface, Tree<String, String> tree)
           throws ConfigurationValidationException {
     if (! iface.isInterface()) {
-      throw new IllegalArgumentException("Blueprints must be constructed from interfaces." +
-              "  Not an interface: " + iface);
+      throw new IllegalArgumentException("Blueprints must be constructed from interfaces" +
+              "; not an interface: " + iface);
     }
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader());
     final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer);
     final T blueprint = stub.getProxy();
 
-    validate(iface, blueprint);
-    return blueprint;
-  }
-
-
-  /* Privates ------------------------------------------------------- */
-
-
-  private static <T> void validate(Class<T> iface, T blueprint) 
-          throws ConfigurationValidationException {
-    LinkedList<String> failedValidations = new LinkedList<String>();
-
-    try {
-      for (Method ifaceMethod : iface.getMethods()) {
-        Method method = blueprint.getClass().getMethod(
-                ifaceMethod.getName(),
-                ifaceMethod.getParameterTypes());
-        /* skip methods with type hints as optional parameters
-        (figuring out the correct arguments is nontrivial) */
-        if (method.getDeclaringClass().equals(blueprint.getClass()) &&
-                method.getParameterTypes().length == 0) {
-          Object returnValue = method.invoke(blueprint);
-
-          final Set<MethodConstraintViolation<T>> violations =
-                  validator.validateReturnValue(blueprint, method, returnValue);
-          for (MethodConstraintViolation<T> violation : violations) {
-            failedValidations.add(violation.getMessage());
-          }
-        }
-      }
-
+    if (validator != null) {
+      List<String> failedValidations = validator.validate(iface, blueprint);
       if (failedValidations.size() > 0) {
         throw new ConfigurationValidationException(failedValidations);
       }
-
-    } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException) {
-        throw (RuntimeException) e.getCause();
-      } else {
-        throw new RuntimeException("Uncaught checked exception!  " +
-                "This might indicate a bug in Blueprint.");
-      }
-
-      /* all other exceptions indicate bugs in Blueprint */
-    } catch (NoSuchMethodException e) {
-      throw fromException(iface, e);
-    } catch (IllegalAccessException e) {
-      throw fromException(iface, e);
     }
-  }
 
-  private static <T> RuntimeException fromException(Class<T> iface, Throwable cause) {
-    return new RuntimeException(String.format("For interface %s", iface), cause);
+    return blueprint;
   }
 
 }

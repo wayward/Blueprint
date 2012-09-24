@@ -29,7 +29,6 @@ package org.codemined.blueprint;
 import org.codemined.util.Path;
 import org.codemined.util.Tree;
 
-import javax.inject.Named;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -186,11 +185,6 @@ class Stub<I> implements InvocationHandler {
     Key keyAnn = method.getAnnotation(Key.class);
     if (keyAnn != null) {
       return keyAnn.value();
-    }
-    /* if absent, check for javax.inject.Named */
-    Named javaxNamedAnn = method.getAnnotation(Named.class);
-    if (javaxNamedAnn != null) {
-      return javaxNamedAnn.value();
     }
     /* no overrides -- return the method's name */
     return method.getName();

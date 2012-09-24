@@ -32,7 +32,7 @@ import static org.testng.Assert.assertTrue;
 @Test
 public class ApacheTreeTest {
 
-  private static final String TEST_PROPERTIES_FILE = "src/test/resources/test.properties";
+  private static final String TEST_PROPERTIES_FILE = "test.properties";
 
   private TestProperties testProperties;
 
