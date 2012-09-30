@@ -76,9 +76,9 @@ Blueprint converts your configuration sources from key-value trees into concrete
 
 You then give this interface to Blueprint along with the appropriate configuration source:
 
-    ServerConfiguration cfg = Blueprint.createBlueprint(
+    ServerConfiguration cfg = Blueprint.create(
         ServerConfiguration.class,
-        new ApacheConfigurationSource(new PropertiesConfiguration("conf/server.properties")));
+        new ApacheTree(new PropertiesConfiguration("conf/server.properties")));
 
 ...and receive an object whose methods will spew out objects parsed from the configuration source:
 
