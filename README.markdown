@@ -107,8 +107,8 @@ contain in order to be considered valid.  For example:
 We then give this interface to Blueprint along with the appropriate configuration source and receive an
 object that does all the necessary conversions for us:
 
-    ServerConfiguration cfg = Blueprint.createBlueprint(ServerConfiguration.class,
-      new ApacheConfigurationSource(new PropertiesConfiguration("conf/server.properties")));
+    ServerConfiguration cfg = Blueprint.create(ServerConfiguration.class,
+      new ApacheTree(new PropertiesConfiguration("conf/server.properties")));
 
     cfg.proxyAddress();                     // => a java.net.URL object parsed from the "proxyAddress" key
     cfg.tmpDirectory();                     // => a java.io.File object parsed from the "tmpDirectory" key
