@@ -18,6 +18,7 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
 
@@ -50,7 +51,7 @@ public class KeyTest {
       mockTree.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, new Path<String>(), deserializer);
+    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, new Path<String>(), deserializer, new IdentityKeyResolver());
     Method method = Iface.class.getMethod("keyOverridesMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);

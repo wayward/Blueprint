@@ -76,12 +76,18 @@ class Stub<I> implements InvocationHandler {
 
   private final Deserializer deserializer;
 
+  private final KeyResolver keyResolver;
+
   private final Map<MethodInvocation, Object> cache;
 
   private final I proxy;
 
 
-  public Stub(Class<I> iface, ConfigTree cfg, Path<String> configPath, Deserializer deserializer) {
+  public Stub(Class<I> iface,
+              ConfigTree cfg,
+              Path<String> configPath,
+              Deserializer deserializer,
+              KeyResolver keyResolver) {
     if (cfg == null) {
       throw new NullPointerException();
     }
@@ -89,6 +95,7 @@ class Stub<I> implements InvocationHandler {
     this.cfg = cfg;
     this.cfgPath = configPath;
     this.deserializer = deserializer;
+    this.keyResolver = keyResolver;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
     this.proxy = createProxy();
   }
@@ -186,7 +193,7 @@ class Stub<I> implements InvocationHandler {
       return keyAnn.value();
     }
     /* no overrides -- return the method's name */
-    return method.getName();
+    return keyResolver.resolve(method.getName());
   }
 
 }

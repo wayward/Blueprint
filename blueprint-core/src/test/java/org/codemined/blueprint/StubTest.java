@@ -18,6 +18,7 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
+import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
 
@@ -50,7 +51,7 @@ public class StubTest {
       mockDeserializer.deserialize(Integer.class, null, "childMethod", mockTree); result = 42;
     }};
     Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class,
-            mockTree, new Path<String>(), mockDeserializer);
+            mockTree, new Path<String>(), mockDeserializer, new IdentityKeyResolver());
     Method method = BlueprintIface.class.getMethod("childMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
 

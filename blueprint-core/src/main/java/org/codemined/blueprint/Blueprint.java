@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.codemined.util.Strings;
 
@@ -30,6 +31,11 @@ import java.util.List;
  */
 public class Blueprint {
 
+
+  public static <T> T create(Class<T> iface, ConfigTree<?> tree) {
+    return create(iface, tree, new IdentityKeyResolver());
+  }
+
   /**
    * Creates a blueprint object.
    *
@@ -37,11 +43,11 @@ public class Blueprint {
    * @param tree configuration tree.
    * @return an instance implementing {@code iface} whose methods return values from the configuration.
    */
-  public static <T> T create(Class<T> iface, ConfigTree<?> tree) {
+  public static <T> T create(Class<T> iface, ConfigTree<?> tree, KeyResolver keyResolver) {
     checkInterface(iface);
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader());
-    final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer);
+    final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer, keyResolver);
     final T blueprint = stub.getProxy();
 
     return blueprint;
