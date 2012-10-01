@@ -31,7 +31,7 @@ public class MethodInvocationTest {
 
   interface I {
     void noArg();
-    void varArg(String... str);
+    void varArg(Class<?>... str);
     void complexArgs(int foo, char... bar);
     int intMethod_noHints();
     int intMethod_paramHint(Class<?> hint);
@@ -50,7 +50,7 @@ public class MethodInvocationTest {
   @Test
   public void handlesVarargHints()
           throws NoSuchMethodException {
-    Method m = I.class.getMethod("varArg", String[].class);
+    Method m = I.class.getMethod("varArg", Class[].class);
     MethodInvocation inv = new MethodInvocation(m, new Object[][] { new Object[] { String.class }});
     assertEquals(inv.getHintedType(), String.class);
   }
@@ -58,7 +58,7 @@ public class MethodInvocationTest {
   @Test(expectedExceptions = BlueprintException.class)
   public void rejectsNonClassVararg()
           throws NoSuchMethodException {
-    Method m = I.class.getMethod("varArg", String[].class);
+    Method m = I.class.getMethod("varArg", Class[].class);
     new MethodInvocation(m, new Object[][] { new Object[] { "foo" }});
   }
 

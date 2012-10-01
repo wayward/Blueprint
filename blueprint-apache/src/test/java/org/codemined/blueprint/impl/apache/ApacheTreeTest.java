@@ -18,6 +18,7 @@ package org.codemined.blueprint.impl.apache;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.codemined.blueprint.impl.ApacheTree;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -32,20 +33,21 @@ import static org.testng.Assert.assertTrue;
 @Test
 public class ApacheTreeTest {
 
-  private static final String TEST_PROPERTIES_FILE = "test.properties";
+  private static final String TEST_FILE = "test.properties";
 
   private TestProperties testProperties;
+
 
   @BeforeClass
   public void setUp()
           throws IOException {
-    this.testProperties = new TestProperties(TEST_PROPERTIES_FILE);
+    this.testProperties = new TestProperties(TEST_FILE);
   }
 
   @Test
   public ApacheTree loadTree() {
     try {
-      PropertiesConfiguration pc = new PropertiesConfiguration(TEST_PROPERTIES_FILE);
+      PropertiesConfiguration pc = new PropertiesConfiguration(TEST_FILE);
       pc.setDelimiterParsingDisabled(true);
       pc.refresh();
       return new ApacheTree(pc);
@@ -57,18 +59,24 @@ public class ApacheTreeTest {
   @Test
   public void validRootNode() {
     ApacheTree t = loadTree();
-    assertEquals(t.getKey(), null);
     assertEquals(t.getValue(), null);
-    assertEquals(t.size(), 15);
+    assertEquals(t.keySet().size(), 15);
   }
 
   @Test
   public void validFirstLevelNodes() {
     ApacheTree t = loadTree();
-    assertEquals(t.size(), testProperties.firstLevelKeys().size());
+    assertEquals(t.keySet().size(), testProperties.firstLevelKeys().size());
     for (String k : testProperties.firstLevelKeys()) {
-      assertTrue(t.contains(k), "key '" + k + "' exists in properties but not in the tree");
+      assertTrue(t.containsTree(k), "key '" + k + "' exists in properties but not in the tree");
     }
+  }
+
+  @Test
+  public void parsesArrays() {
+    ApacheTree t = loadTree();
+    assertEquals(t.getTree("backupHours").getList().size(), 3);
+    assertEquals(t.getTree("activeBackupDays").getList().size(), 7);
   }
 
 }

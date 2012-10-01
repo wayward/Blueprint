@@ -18,6 +18,8 @@ package org.codemined.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>In-memory tree.</p>
@@ -31,44 +33,37 @@ import java.util.Iterator;
  */
 public class InMemoryTree<K,V> extends AbstractTree<K,V> {
 
-  private K key;
-
   private V value;
 
   private HashMap<K,Tree<K,V>> subTrees;
 
 
   public InMemoryTree() {
-    this(null, null);
+    this(null);
   }
 
-  public InMemoryTree(K key, V value) {
+  public InMemoryTree(V value) {
     super();
-    this.key = key;
     this.value = value;
     this.subTrees = new HashMap<K,Tree<K,V>>();
   }
 
   @Override
-  public K getKey() {
-    return key;
-  }
-
   public V getValue() {
     return value;
   }
 
   @Override
-  public Tree<K,V> get(K subKey) {
-    return subTrees.get(subKey);
+  public Tree<K,V> get(K key) {
+    return subTrees.get(key);
   }
 
   @Override
-  public Tree<K,V> put(K subKey, V value) {
-    Tree<K,V> t = subTrees.get(subKey);
+  public Tree<K,V> put(K key, V value) {
+    Tree<K,V> t = subTrees.get(key);
     if (t == null) {
-      t = new InMemoryTree<K,V>(subKey, value);
-      subTrees.put(subKey, t);
+      t = new InMemoryTree<K,V>(value);
+      subTrees.put(key, t);
     } else {
       t.setValue(value);
     }
@@ -76,13 +71,8 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
   }
 
   @Override
-  public Tree<K,V> put(Tree<K,V> subTree) {
-    return subTrees.put(subTree.getKey(), subTree);
-  }
-
-  @Override
-  public void setKey(K key) {
-    this.key = key;
+  public Tree<K,V> putTree(K key, Tree<K, V> subTree) {
+    return subTrees.put(key, subTree);
   }
 
   @Override
@@ -91,8 +81,8 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
   }
 
   @Override
-  public boolean contains(K subKey) {
-    return subTrees.containsKey(subKey);
+  public boolean contains(K key) {
+    return subTrees.containsKey(key);
   }
 
   @Override
@@ -105,11 +95,21 @@ public class InMemoryTree<K,V> extends AbstractTree<K,V> {
     return subTrees.size();
   }
 
+  @Override
+  public Set<Map.Entry<K, Tree<K, V>>> entrySet() {
+    return subTrees.entrySet();
+  }
 
-  /* Protected methods ---------------------------------------------- */
+  /* Builder methods ------------------------------------------------ */
 
-  protected Tree<K,V> add(Tree<K,V> subTree) {
-    return subTrees.put(subTree.getKey(), subTree);
+  public InMemoryTree<K, V> with(K key, V value) {
+    put(key, value);
+    return this;
+  }
+
+  public InMemoryTree<K, V> with(K key, InMemoryTree<K, V> tree) {
+    putTree(key, tree);
+    return this;
   }
 
 

@@ -25,19 +25,28 @@ import java.util.Map;
  * @author Zoran Rilak
  */
 public class Types {
-  private static final Map<Class<?>, Class<?>> primitiveTable;
+  private static final Map<Class<?>, Class<?>> translationTable;
 
 
   static {
-    primitiveTable = new HashMap<Class<?>, Class<?>>();
-    primitiveTable.put(byte.class, Byte.class);
-    primitiveTable.put(short.class, Short.class);
-    primitiveTable.put(int.class, Integer.class);
-    primitiveTable.put(long.class, Long.class);
-    primitiveTable.put(float.class, Float.class);
-    primitiveTable.put(double.class, Double.class);
-    primitiveTable.put(boolean.class, Boolean.class);
-    primitiveTable.put(char.class, Character.class);
+    // We can do this because boxed() and unboxed() check if types are primitives.
+    translationTable = new HashMap<Class<?>, Class<?>>();
+    translationTable.put(byte.class, Byte.class);
+    translationTable.put(Byte.class, byte.class);
+    translationTable.put(short.class, Short.class);
+    translationTable.put(Short.class, short.class);
+    translationTable.put(int.class, Integer.class);
+    translationTable.put(Integer.class, int.class);
+    translationTable.put(long.class, Long.class);
+    translationTable.put(Long.class, long.class);
+    translationTable.put(float.class, Float.class);
+    translationTable.put(Float.class, float.class);
+    translationTable.put(double.class, Double.class);
+    translationTable.put(Double.class, double.class);
+    translationTable.put(boolean.class, Boolean.class);
+    translationTable.put(Boolean.class, boolean.class);
+    translationTable.put(char.class, Character.class);
+    translationTable.put(Character.class, char.class);
   }
 
 
@@ -46,12 +55,23 @@ public class Types {
    *  @param type may be null
    */
   @SuppressWarnings("unchecked")
-  public static <T> Class<T> deprimitivize(Class<?> type) {
+  public static <T> Class<T> boxed(Class<?> type) {
     if (type == null) {
       return null;
     }
     if (type.isPrimitive()) {
-      type = primitiveTable.get(type);
+      type = translationTable.get(type);
+    }
+    return (Class<T>) type;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Class<T> unboxed(Class<?> type) {
+    if (type == null) {
+      return null;
+    }
+    if (! type.isPrimitive() && translationTable.containsKey(type)) {
+      type = translationTable.get(type);
     }
     return (Class<T>) type;
   }

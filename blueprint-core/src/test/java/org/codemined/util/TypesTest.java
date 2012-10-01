@@ -25,22 +25,22 @@ import static org.testng.Assert.assertNull;
 public class TypesTest {
 
   public void testNull() {
-    assertNull(Types.deprimitivize(null));
+    assertNull(Types.boxed(null));
   }
 
   public void testAllPrimitives() {
-    assertEquals(Types.deprimitivize(byte.class), Byte.class);
-    assertEquals(Types.deprimitivize(short.class), Short.class);
-    assertEquals(Types.deprimitivize(int.class), Integer.class);
-    assertEquals(Types.deprimitivize(long.class), Long.class);
-    assertEquals(Types.deprimitivize(float.class), Float.class);
-    assertEquals(Types.deprimitivize(double.class), Double.class);
-    assertEquals(Types.deprimitivize(boolean.class), Boolean.class);
-    assertEquals(Types.deprimitivize(char.class), Character.class);
+    assertEquals(Types.boxed(byte.class), Byte.class);
+    assertEquals(Types.boxed(short.class), Short.class);
+    assertEquals(Types.boxed(int.class), Integer.class);
+    assertEquals(Types.boxed(long.class), Long.class);
+    assertEquals(Types.boxed(float.class), Float.class);
+    assertEquals(Types.boxed(double.class), Double.class);
+    assertEquals(Types.boxed(boolean.class), Boolean.class);
+    assertEquals(Types.boxed(char.class), Character.class);
   }
   
   public void testNonPrimitive() {
-    assertEquals(String.class, Types.deprimitivize(String.class));
+    assertEquals(String.class, Types.boxed(String.class));
   }
 
 }

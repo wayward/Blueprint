@@ -19,7 +19,7 @@
 
     <groupId>org.codemined</groupId>
     <artifactId>blueprint</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Blueprint</name>
     <description>Type-safe configuration framework for Java</description>
@@ -35,6 +35,7 @@
         <module>blueprint-core</module>
         <module>blueprint-validation</module>
         <module>blueprint-apache</module>
+        <module>blueprint-jackson-json</module>
     </modules>
 
     <licenses>

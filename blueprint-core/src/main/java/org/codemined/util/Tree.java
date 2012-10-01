@@ -17,6 +17,8 @@
 package org.codemined.util;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An immutable N-ary tree.
@@ -25,17 +27,13 @@ import java.util.List;
  */
 public interface Tree<K,V> extends Iterable<Tree<K,V>> {
 
-  K getKey();
-
   V getValue();
 
-  Tree<K,V> get(K subKey);
+  Tree<K,V> get(K key);
 
   Tree<K,V> getByPath(List<K> path);
 
-  boolean contains(K subKey);
-
-  public void setKey(K key);
+  boolean contains(K key);
 
   public void setValue(V value);
 
@@ -44,7 +42,7 @@ public interface Tree<K,V> extends Iterable<Tree<K,V>> {
    *
    * @return the updated or newly created sub-tree.
    */
-  Tree<K,V> put(K subKey, V value);
+  Tree<K,V> put(K key, V value);
 
   /**
    * Adds a sub-tree to this tree.
@@ -53,7 +51,7 @@ public interface Tree<K,V> extends Iterable<Tree<K,V>> {
    * @return the previous sub-tree associated with the given
    * sub-tree's key, or null if there was no such sub-tree.
    */
-  Tree<K,V> put(Tree<K,V> subTree);
+  Tree<K,V> putTree(K key, Tree<K, V> subTree);
 
   Tree<K,V> putByPath(List<K> path, V value);
 
@@ -65,5 +63,7 @@ public interface Tree<K,V> extends Iterable<Tree<K,V>> {
    * @return number of sub-trees.
    */
   int size();
+
+  Set<Map.Entry<K, Tree<K, V>>> entrySet();
 
 }

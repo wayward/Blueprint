@@ -32,7 +32,7 @@ public interface ValidatingConfiguration {
    * given combination of interface and configuration source.
    */
   @Min(0)
-  @Max(23)
+  @Max(24)
   int hours();
 
   /* Configuration values can be made mandatory with @NotNull.

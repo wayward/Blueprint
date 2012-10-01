@@ -16,8 +16,6 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.util.InMemoryTree;
-import org.codemined.util.Tree;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,17 +33,13 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-  private static final Tree<String, String> testTree = createTestTree();
+  private static final ConfigTree testTree = createTestTree();
 
 
   @Test
   @BeforeClass
   private TestConfiguration createTestBlueprint() {
-    try {
-      return Blueprint.create(TestConfiguration.class, testTree);
-    } catch (ConfigurationValidationException e) {
-      throw new RuntimeException(e);
-    }
+    return Blueprint.create(TestConfiguration.class, testTree);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
@@ -83,10 +77,20 @@ public class BlueprintTest {
     assertEquals(iter.next().intValue(), 8);
     assertEquals(iter.next().intValue(), 18);
 
-    assertEquals(cfg.activeBackupDays().getClass(), ArrayList.class);
-    assertEquals(cfg.activeBackupDays().size(), 7);
-    assertEquals(cfg.activeBackupDays().get(0), true);
-    assertEquals(cfg.activeBackupDays().get(1), false);
+    assertEquals(cfg.activeBackupDays(boolean.class).getClass(), ArrayList.class);
+    assertEquals(cfg.activeBackupDays(boolean.class).size(), 7);
+    assertTrue(cfg.activeBackupDays(boolean.class).get(0));
+    assertFalse(cfg.activeBackupDays(boolean.class).get(1));
+  }
+
+  @Test
+  public void arrayDeserialization() {
+    TestConfiguration cfg = createTestBlueprint();
+
+    assertEquals(cfg.activeBackupDays().getClass(), boolean[].class);
+    assertEquals(cfg.activeBackupDays().length, 7);
+    assertTrue(cfg.activeBackupDays()[0]);
+    assertFalse(cfg.activeBackupDays()[1]);
   }
 
   @Test
@@ -153,29 +157,29 @@ public class BlueprintTest {
   /* Privates ------------------------------------------------------- */
 
 
-  private static Tree<String, String> createTestTree() {
-    InMemoryTree<String, String> t = new InMemoryTree<String, String>();
+  private static ConfigTree<?> createTestTree() {
+    TestConfigTree t = new TestConfigTree();
     t.put("serviceName", "DummyService");
     t.put("isActive", "true");
     t.put("timeout", "15");
     t.put("tempDir", "/tmp/blueprint");
     t.put("deployUrl", "http://www.codemined.org/blueprint");
-    t.put("backupHours", "3,8,18");
-    t.put("activeBackupDays", "true, false, false, true, false, true, true");
+    t.put("backupHours", null).setList("3", "8", "18");
+    t.put("activeBackupDays", null).setList("true", "false", "false", "true", "false", "true", "true");
 
-    Tree<String, String> http = t.put("http", null);
+    TestConfigTree http = t.put("http", null);
     http.put("host", "localhost");
     http.put("port", "65536");
     http.put("ssl", "true");
 
-    Tree<String, String> proto = t.put("protocols", null);
-    Tree<String, String> telnet = proto.put("telnet", "disabled");
+    TestConfigTree proto = t.put("protocols", null);
+    TestConfigTree telnet = proto.put("telnet", "disabled");
     telnet.put("name", "Telnet");
     telnet.put("port", "25");
-    Tree<String, String> ftp = proto.put("ftp", "enabled");
+    TestConfigTree ftp = proto.put("ftp", "enabled");
     ftp.put("name", "FTP");
     ftp.put("port", "21");
-    Tree<String, String> dns = proto.put("dns", "enabled");
+    TestConfigTree dns = proto.put("dns", "enabled");
     dns.put("name", "DNS");
     dns.put("port", "53");
 
@@ -183,12 +187,12 @@ public class BlueprintTest {
     t.put("typeHintDemo1", "1");
     t.put("typeHintDemo2", "2");
 
-    Tree<String, String> db = t.put("db", null);
+    TestConfigTree db = t.put("db", null);
     db.put("impl", "java.util.Random");
-    Tree<String, String> devel = db.put("development", null);
+    TestConfigTree devel = db.put("development", null);
     devel.put("name", "devel");
     devel.put("isTemporary", "true");
-    Tree<String, String> prod = db.put("production", null);
+    TestConfigTree prod = db.put("production", null);
     prod.put("name", "Production");
     prod.put("isTemporary", "false");
 

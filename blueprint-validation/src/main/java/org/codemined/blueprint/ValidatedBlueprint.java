@@ -29,33 +29,65 @@ import java.util.Set;
 /**
  * @author Zoran Rilak
  */
-class ValidatorImpl implements Validator {
+public class ValidatedBlueprint {
 
-  private MethodValidator methodValidator;
+  private static final Object[] NULL_HINT = new Object[] { null };
 
-  public ValidatorImpl() {
-    this.methodValidator = Validation.byProvider(HibernateValidator.class)
-            .configure()
-            .buildValidatorFactory()
-            .getValidator()
-            .unwrap(MethodValidator.class);
+
+  public static <T> T create(Class<T> iface, ConfigTree tree)
+          throws ConfigurationValidationException {
+    T blueprint = Blueprint.create(iface, tree);
+
+      List<String> failedValidations = validate(iface, blueprint,
+              Validation.byProvider(HibernateValidator.class)
+                      .configure()
+                      .buildValidatorFactory()
+                      .getValidator()
+                      .unwrap(MethodValidator.class));
+    if (failedValidations.size() > 0) {
+      throw new ConfigurationValidationException(failedValidations);
+    }
+
+    return blueprint;
   }
 
-  public <T> List<String> validate(Class<T> iface, T blueprint)
+  /* Privates ------------------------------------------------------- */
+
+  /**
+   * Validates all methods on a blueprint interface.
+   *
+   * @param iface
+   * @param blueprint
+   * @param methodValidator
+   * @param <T>
+   * @return
+   * @throws ConfigurationValidationException if the configuration fails to validate against
+   * {@code javax.validation.constraints.*} annotations present of {@code iface}'s methods.
+   */
+  private static <T> List<String> validate(Class<T> iface, T blueprint, MethodValidator methodValidator)
           throws ConfigurationValidationException {
     LinkedList<String> failedValidations = new LinkedList<String>();
     try {
       for (Method ifaceMethod : iface.getMethods()) {
+        //FIXME why query the blueprint instance again?  I forgot.  Need to check.
+        // get the method
         Method method = blueprint.getClass().getMethod(
                 ifaceMethod.getName(),
                 ifaceMethod.getParameterTypes());
-        /* skip methods with optional type hints (don't know what to pass) */
-        if (method.getDeclaringClass().equals(blueprint.getClass()) &&
-                method.getParameterTypes().length == 0) {
-          Object returnValue = method.invoke(blueprint);
+
+        // validate the method if it comes from the blueprint interface
+        if (method.getDeclaringClass().equals(blueprint.getClass())) {
+          Object value;
+
+          if (method.getParameterTypes().length == 0) {
+            value = method.invoke(blueprint);
+          } else {
+            // pass null for runtime type hint (fall back to the declared return type)
+            value = method.invoke(blueprint, NULL_HINT);
+          }
 
           final Set<MethodConstraintViolation<T>> violations =
-                  methodValidator.validateReturnValue(blueprint, method, returnValue);
+                  methodValidator.validateReturnValue(blueprint, method, value);
           for (MethodConstraintViolation<T> violation : violations) {
             failedValidations.add(violation.getMessage());
           }

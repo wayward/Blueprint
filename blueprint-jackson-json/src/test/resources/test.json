@@ -1,0 +1,12 @@
+{
+  "name": "Donald Duck",
+  "age": 71,
+  "family": {
+    "mother": "Hortense McDuck",
+    "father": "Quackmore Duck",
+    "sister": "Della Duck",
+    "uncle": "Scrooge McDuck",
+    "nephews": [ "Huey", "Dewey", "Louie" ],
+    "married": false
+  }
+}

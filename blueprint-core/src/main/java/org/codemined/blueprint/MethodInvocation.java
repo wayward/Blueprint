@@ -44,7 +44,7 @@ import java.util.Arrays;
  */
 class MethodInvocation {
 
-  /** Stand-in for null argument list of no-args methods. */
+  /** Stand-in for null argument list of methods without arguments. */
   private static final Object[] NO_ARGS = new Object[] {};
 
   /** Java reflection object representing the method being called. */
@@ -73,10 +73,13 @@ class MethodInvocation {
    * @param args runtime arguments passed in the method call.
    */
   public MethodInvocation(Method method, Object[] args) {
+    /* ensure that the blueprint runtime call semantic has been observed */
+    BlueprintMethod.checkArguments(method);
+
     this.method = method;
     this.args = unwrapRuntimeArguments(args);
-    this.returnType = Types.deprimitivize(method.getReturnType());
-    this.hintedType = Types.deprimitivize(getHintedType0());
+    this.returnType = Types.boxed(method.getReturnType());
+    this.hintedType = Types.boxed(getHintedType0());
   }
 
 
@@ -183,18 +186,13 @@ class MethodInvocation {
    * @return class object or null.
    */
   private Class<?> getRuntimeTypeHint0() {
-    /* ensure that the blueprint method call semantic has been observed */
-    switch (args.length) {
-      case 0:
+    if (args.length == 0) {
         return null;
-      case 1:
-        if (! (args[0] instanceof Class)) {
-          throw new BlueprintException("Type hint must be a class, "
-                  + "but an instance of " + args[0].getClass().getName() + " was given");
-        }
-        return (Class<?>) args[0];
-      default:
-        throw new BlueprintException("Blueprint methods may only take one optional type hint argument");
+    } else {
+      if (! (args[0] instanceof Class)) {
+        throw new BlueprintException("Runtime type hints must be instances of Class");
+      }
+      return (Class<?>) args[0];
     }
   }
 

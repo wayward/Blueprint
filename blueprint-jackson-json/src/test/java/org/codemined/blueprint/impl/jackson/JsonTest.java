@@ -1,4 +1,4 @@
-/*
+package org.codemined.blueprint.impl.jackson;/*
  * Copyright 2012. Zoran Rilak
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package org.codemined.blueprint;
+import org.codemined.blueprint.Blueprint;
+import org.testng.annotations.Test;
 
-import java.util.List;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Zoran Rilak
  */
-interface Validator {
+@Test
+public class JsonTest {
 
-  <T> List<String> validate(Class<T> iface, T blueprint)
-    throws ConfigurationValidationException;
+  @Test
+  public void readsArrays() {
+    JsonTestConfiguration cfg = Blueprint.create(JsonTestConfiguration.class, JsonTreeTest.loadTree());
+    String[] n = cfg.family().nephews();
+    assertEquals(n.length, 3);
+    assertEquals(n[0], "Huey");
+    assertEquals(n[1], "Dewey");
+    assertEquals(n[2], "Louie");
+  }
+
+
 
 }

@@ -17,8 +17,10 @@
 package org.codemined.blueprint;
 
 import org.codemined.util.Path;
-import org.codemined.util.Tree;
+import org.codemined.util.Strings;
 
+import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -28,50 +30,55 @@ import java.util.List;
  */
 public class Blueprint {
 
-  private static Validator validator = null;
-
-  static {
-    //=== Load the validation framework ===
-    try {
-      Class<?> clazz = Class.forName("org.codemined.blueprint.ValidatorImpl");
-      Blueprint.validator = (Validator) clazz.newInstance();
-
-    } catch (ClassNotFoundException ignored) {
-      // ClassNotFoundException means that the validation isn't loaded, so we'll pass
-    } catch (Exception e) {
-      // Any other exception is a problem with the framework
-      throw new ExceptionInInitializerError(e);
-    }
-  }
-
   /**
    * Creates a blueprint object.
    *
    * @param iface the interface for configuration access.
    * @param tree configuration tree.
    * @return an instance implementing {@code iface} whose methods return values from the configuration.
-   * @throws ConfigurationValidationException if validation is loaded and the configuration fails to validate
-   * against {@code javax.validation.constraints.*} annotations present of {@code iface}'s methods.
    */
-  public static <T> T create(Class<T> iface, Tree<String, String> tree)
-          throws ConfigurationValidationException {
-    if (! iface.isInterface()) {
-      throw new IllegalArgumentException("Blueprints must be constructed from interfaces" +
-              "; not an interface: " + iface);
-    }
+  public static <T> T create(Class<T> iface, ConfigTree<?> tree) {
+    checkInterface(iface);
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader());
     final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer);
     final T blueprint = stub.getProxy();
 
-    if (validator != null) {
-      List<String> failedValidations = validator.validate(iface, blueprint);
-      if (failedValidations.size() > 0) {
-        throw new ConfigurationValidationException(failedValidations);
-      }
+    return blueprint;
+  }
+
+
+  /* Privates ------------------------------------------------------- */
+
+  /**
+   * Checks if an interface is conformant to the semantics required by Blueprint.
+   *
+   * @param iface
+   */
+  private static void checkInterface(Class<?> iface) {
+    if (! iface.isInterface()) {
+      throw new IllegalArgumentException(String.format(
+              "Blueprints must be constructed from interfaces; %s is not an interface.",
+              iface));
     }
 
-    return blueprint;
+    List<String> failedMethodChecks = new LinkedList<String>();
+    for (Method method : iface.getMethods()) {
+      List<String> failedChecksForMethod = new LinkedList<String>();
+      BlueprintMethod.checkReturnType(method.getReturnType(), failedChecksForMethod);
+      BlueprintMethod.checkArguments(method, failedChecksForMethod);
+
+      for (String error : failedChecksForMethod) {
+        failedMethodChecks.add(String.format("method %s: %s\n", method, error));
+      }
+
+      if (! failedMethodChecks.isEmpty()) {
+        throw new IllegalArgumentException(String.format(
+                "Interface %s cannot be used to construct a blueprint:\n%s",
+                iface,
+                Strings.join("\n", failedMethodChecks)));
+      }
+    }
   }
 
 }

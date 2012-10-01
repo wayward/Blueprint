@@ -17,12 +17,14 @@
 package org.codemined.blueprint;
 
 import org.codemined.util.Path;
-import org.codemined.util.Tree;
+import org.codemined.util.Types;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,19 +54,19 @@ class Deserializer {
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(Class<?> returnType, Class<?> hintedType, Tree<String,String> cfg) {
+  public <T> T deserialize(Class<?> returnType, Class<?> hintedType, String key, ConfigTree<?> cfg) {
 
     /* Maps and collections require a type hint to use as element type. */
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
-        throw new BlueprintException("Maps require a type hint");
+        throw new BlueprintException("Maps require a non-null type hint");
       }
       return (T) deserializeMap(hintedType, cfg);
     }
 
     if (Collection.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
-        throw new BlueprintException("Collections require a type hint");
+        throw new BlueprintException("Collections require a non-null type hint");
       }
       return (T) deserializeCollection((Class<Collection>)returnType, hintedType, cfg);
     }
@@ -82,12 +84,16 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      Path<String> newCfgPath = Context.getThreadInstance().getCfgPath().to(cfg.getKey());
-      return (T) deserializeInterface(returnType, cfg, newCfgPath);
+      Path<String> p = Context.getThreadInstance().getCfgPath().to(key);
+      return (T) deserializeInterface(returnType, cfg, p);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
       return (T) deserializeClass(cfg);
+    }
+
+    if (returnType.isArray()) {
+      return (T) deserializeArray(returnType, cfg);
     }
 
     /* if no special handling applies, deserialize as a simple type
@@ -103,13 +109,13 @@ class Deserializer {
    * @param <E> Element type.
    * @return Deserialized instance of the given map type.
    */
-  public <E> Map<String,E> deserializeMap(Class<E> elementType, Tree<String,String> cfg) {
-    final Map<String,E> targetMap = Reifier.reifyStringMap();
-    for (Tree<String,String> subTree : cfg) {
-      final E element = deserialize(elementType, null, subTree);
-      targetMap.put(subTree.getKey(), element);
+  public <E> Map<String, E> deserializeMap(Class<E> elementType, ConfigTree<?> cfg) {
+    final Map<String, E> map = Reifier.reifyStringMap();
+    for (String key : cfg.keySet()) {
+      final E element = deserialize(elementType, null, key, cfg.getTree(key));
+      map.put(key, element);
     }
-    return targetMap;
+    return map;
   }
 
 
@@ -124,16 +130,13 @@ class Deserializer {
   @SuppressWarnings("unchecked")
   private <E, T extends Collection<E>> T deserializeCollection(Class<T> type,
                                                             Class<E> elementType,
-                                                            Tree<String,String> cfg) {
-    final T targetCollection = (T) Reifier.reifyCollection(type);
-    // split at commas, ignoring whitespace (multiple commas yield empty elements)
-    //TODO provide for custom list splitters (although this is going to be OK 99% of the time)
-    String[] elements = cfg.getValue().split("\\s*,\\s*");
-    for (String eStr : elements) {
-      E element = deserializeSimpleTypeFromValue(elementType, eStr);
-      targetCollection.add(element);
+                                                            ConfigTree<?> cfg) {
+    final T col = (T) Reifier.reifyCollection(type);
+    int i = 0;
+    for (ConfigTree<?> t : cfg.getList()) {
+      col.add(elementType.cast(deserialize(elementType, null, "[" + i + "]", t)));
     }
-    return targetCollection;
+    return col;
   }
 
 
@@ -144,7 +147,7 @@ class Deserializer {
    * @param <T> Interface type.
    * @return Deserialized instance of the given interface type.
    */
-  private <T> T deserializeInterface(Class<T> type, Tree<String,String> cfg, Path<String> cfgPath) {
+  private <T> T deserializeInterface(Class<T> type, ConfigTree<?> cfg, Path<String> cfgPath) {
     return new Stub<T>(type, cfg, cfgPath, this).getProxy();
   }
 
@@ -153,12 +156,28 @@ class Deserializer {
    * @param cfg Configuration cfg to deserialize from.
    * @return Deserialized class object.
    */
-  private Class<?> deserializeClass(Tree<String,String> cfg) {
+  private Class<?> deserializeClass(ConfigTree<?> cfg) {
     try {
       return classLoader.loadClass(cfg.getValue());
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
+  }
+
+  private <T> T deserializeArray(Class<T> type, ConfigTree<?> cfg) {
+    Class<?> elementType = type.getComponentType();
+    List<? extends ConfigTree<?>> elements = cfg.getList();
+
+    Object array = Array.newInstance(elementType, elements.size());
+    for (int i = 0; i < elements.size(); i++) {
+      if (elementType.isPrimitive()) {
+        Array.set(array, i, deserializeSimpleType(Types.boxed(elementType), elements.get(i)));
+      } else {
+        Array.set(array, i, deserialize(elementType, null, "[" + i + "]", elements.get(i)));
+      }
+    }
+
+    return type.cast(array);
   }
 
   /**
@@ -168,33 +187,36 @@ class Deserializer {
    * @param <T> Simple type (primitive, boxed or String).
    * @return Deserialized instance of a simple type.
    */
-  private <T> T deserializeSimpleType(Class<T> type, Tree<String,String> cfg) {
+  private <T> T deserializeSimpleType(Class<T> type, ConfigTree<?> cfg) {
     return deserializeSimpleTypeFromValue(type, cfg.getValue());
   }
 
 
   /**
    *
-   * @param type Simple type (String, primitive or boxed) to deserialize to.
+   * @param type Simple type (String or boxed) to deserialize to.
    * @param value String to deserialize from.
    * @param <T> Simple type (primitive, boxed or String).
    * @return Deserialized instance of a simple type.
    */
   private <T> T deserializeSimpleTypeFromValue(Class<T> type, String value) {
-    T obj;
+    T o = null;
+
     for (String methodName : STATIC_DESERIALIZER_METHODS) {
-      obj = useStaticDeserializer(type, methodName, value);
-      if (obj != null) {
-        return obj;
+      o = useStaticDeserializer(type, methodName, value);
+      if (o != null) {
+        break;
       }
     }
-    obj = useConstructorDeserializer(type, value);
-    if (obj != null) {
-      return obj;
+    if (o == null) {
+      o = useConstructorDeserializer(type, value);
+    }
+    if (o == null) {
+      throw new BlueprintException("No appropriate deserialization method found" +
+              " for type " + type.getName());
     }
 
-    throw new BlueprintException("No appropriate deserialization method found" +
-            " for type " + type.getName());
+    return o;
   }
 
   /**

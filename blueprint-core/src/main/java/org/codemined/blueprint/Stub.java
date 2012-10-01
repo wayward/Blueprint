@@ -27,7 +27,6 @@ package org.codemined.blueprint;
    (but keep validations in mind: do we re-run them, and if so, when?) */
 
 import org.codemined.util.Path;
-import org.codemined.util.Tree;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -71,7 +70,7 @@ class Stub<I> implements InvocationHandler {
 
   private final Class<I> iface;
 
-  private final Tree<String,String> cfg;
+  private final ConfigTree cfg;
 
   private final Path<String> cfgPath;
 
@@ -82,12 +81,12 @@ class Stub<I> implements InvocationHandler {
   private final I proxy;
 
 
-  public Stub(Class<I> iface, Tree<String,String> configTree, Path<String> configPath, Deserializer deserializer) {
-    if (configTree == null) {
+  public Stub(Class<I> iface, ConfigTree cfg, Path<String> configPath, Deserializer deserializer) {
+    if (cfg == null) {
       throw new NullPointerException();
     }
     this.iface = iface;
-    this.cfg = configTree;
+    this.cfg = cfg;
     this.cfgPath = configPath;
     this.deserializer = deserializer;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
@@ -103,35 +102,35 @@ class Stub<I> implements InvocationHandler {
   /* Methods from InvocationHandler --------------------------------- */
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] argClasses) throws Throwable {
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     // mark the context in which we're going to execute
-    Context.getThreadInstance().setContext(method, argClasses, iface, cfgPath);
+    Context.getThreadInstance().setContext(method, args, iface, cfgPath);
 
     // route methods not declared on the blueprint interface to self
     if (method.getDeclaringClass() == Object.class) {
-      return method.invoke(this, argClasses);
+      return method.invoke(this, args);
     }
 
     final String key = getKeyFor(method);
     // Values are cached by (method, args) pairs to support runtime type hints.
-    MethodInvocation invocation = new MethodInvocation(method, argClasses);
+    MethodInvocation invocation = new MethodInvocation(method, args);
     Object o = cache.get(invocation);
     if (o == null) {
       // Get the tree whose value will be passed to the deserializer.
-      // For special methods ($value, $asMap), use the tree associated with this stub
-      // instead of looking up children trees.
-      Tree<String,String> t;
+      // For special methods ($value, $asMap), use the tree already associated
+      // with this stub instead of looking up children trees.
+      ConfigTree t;
       if (key == null) {
         t = cfg;
       } else {
-        t = cfg.get(key);
+        t = cfg.getTree(key);
       }
       if (t == null) {
         throw new BlueprintException("Configuration key '" + key +
                 "' does not exist on path " + cfgPath);
       }
 
-      o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), t);
+      o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key, t);
       cache.put(invocation, o);
     }
     return o;

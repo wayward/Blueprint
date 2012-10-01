@@ -32,7 +32,7 @@ public class AbstractTreeTest {
 
   @Test
   public void getByPath_noSubTree() {
-    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two").put(3, "three");
     t.get(2).put(4, "four").put(5, "five");
     assertNull(t.getByPath(new Path<Integer>(100)));
@@ -42,7 +42,7 @@ public class AbstractTreeTest {
 
   @Test
   public void getByPath() throws Exception {
-    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two").put(3, "three");
     t.get(2).put(4, "four").put(5, "five");
     assertEquals(t.getByPath(new Path<Integer>(2, 3)).getValue(), "three");
@@ -51,7 +51,7 @@ public class AbstractTreeTest {
 
   @Test
   public void putByPath_createsSubTree() throws Exception {
-    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.putByPath(new Path<Integer>(2, 3), "three");
     assertEquals(t.getByPath(new Path<Integer>(2)).getValue(), null);
     assertEquals(t.getByPath(new Path<Integer>(2, 3)).getValue(), "three");

@@ -18,7 +18,6 @@ package org.codemined.blueprint;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import org.codemined.util.AbstractTree;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
 
@@ -41,13 +40,13 @@ public class KeyTest {
     @Key("keyOverride") int keyOverridesMethod();
   }
 
-  @Mocked AbstractTree<String,String> mockTree;
+  @Mocked ConfigTree mockTree;
 
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
-      mockTree.get("keyOverride"); result = mockTree;
+      mockTree.getTree("keyOverride"); result = mockTree;
       mockTree.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());

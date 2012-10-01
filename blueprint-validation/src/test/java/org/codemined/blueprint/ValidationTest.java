@@ -16,38 +16,37 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.util.InMemoryTree;
-import org.codemined.util.Tree;
 import org.testng.annotations.Test;
 
 /**
  * @author Zoran Rilak
  */
+@Test
 public class ValidationTest {
 
   @Test
   public void validates()
           throws ConfigurationValidationException {
-    Blueprint.create(ValidatingConfiguration.class, createTree());
+    ValidatedBlueprint.create(ValidatingConfiguration.class, createTree());
   }
 
   @Test(expectedExceptions = ConfigurationValidationException.class)
-  public void rejectsValuesOutOfRange()
+  public void rejectsOutOfRange()
           throws ConfigurationValidationException {
-    Tree<String, String> cfg = createTree();
-    cfg.get("hours").setValue("24");
-    Blueprint.create(ValidatingConfiguration.class, cfg);
+    TestConfigTree cfg = createTree();
+    cfg.getTree("hours").setValue("25");
+    ValidatedBlueprint.create(ValidatingConfiguration.class, cfg);
   }
 
   /* Privates ------------------------------------------------------- */
 
 
-  private Tree<String, String> createTree() {
-    InMemoryTree<String, String> t = new InMemoryTree<String, String>();
+  private TestConfigTree createTree() {
+    TestConfigTree t = new TestConfigTree();
     t.put("hours", "4");
     t.put("dayOfWeek", "Thursday");
     t.put("birthday", "23/11/1878");
-    t.put("names", "Felipe Cayetano Lopez Martinez y Gonzales");
+    t.put("names", null).setList("Felipe", "Cayetano", "Lopez", "Martinez", "Gonzales");
     t.put("eMail", "chico@darkwood.net");
     return t;
   }

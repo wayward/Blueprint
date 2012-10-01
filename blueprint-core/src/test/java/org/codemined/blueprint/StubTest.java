@@ -19,7 +19,6 @@ package org.codemined.blueprint;
 import mockit.Expectations;
 import mockit.Mocked;
 import org.codemined.util.Path;
-import org.codemined.util.Tree;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
@@ -31,7 +30,7 @@ public class StubTest {
 
   @Mocked Deserializer mockDeserializer;
 
-  @Mocked Tree<String,String> mockTree;
+  @Mocked ConfigTree<?> mockTree;
 
   @SuppressWarnings("unused")
   private interface ChildIface {
@@ -47,8 +46,8 @@ public class StubTest {
   public void picksUpInheritedMethods()
           throws Throwable {
     new Expectations() {{
-      mockTree.get("childMethod"); result = mockTree;
-      mockDeserializer.deserialize(Integer.class, null, mockTree); result = 42;
+      mockTree.getTree("childMethod"); result = mockTree;
+      mockDeserializer.deserialize(Integer.class, null, "childMethod", mockTree); result = 42;
     }};
     Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class,
             mockTree, new Path<String>(), mockDeserializer);

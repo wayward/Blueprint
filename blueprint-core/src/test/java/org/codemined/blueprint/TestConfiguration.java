@@ -67,10 +67,13 @@ public interface TestConfiguration {
   @UseType(Integer.class)
   List<Integer> backupHours();
 
-  /* Concrete collection types can also be used.
+  /* Concrete collection types can also be used...
    */
-  @UseType(Boolean.class)
-  ArrayList activeBackupDays();
+  <T> ArrayList<T> activeBackupDays(Class<T> elementType);
+
+  /* ...as well as arrays.
+   */
+  boolean[] activeBackupDays();
 
   /* Maps, like collections, are read by type-hinting the desired element type,
    * either at runtime or by annotating the method with @UseType().

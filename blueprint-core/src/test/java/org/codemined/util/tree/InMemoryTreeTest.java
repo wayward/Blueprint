@@ -34,12 +34,9 @@ public class InMemoryTreeTest {
 
   @Test
   public void gettersAndSetters() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
-    assertEquals(t.getKey(), new Integer(1));
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     assertEquals(t.getValue(), "one");
-    t.setKey(2);
     t.setValue("two");
-    assertEquals(t.getKey(), new Integer(2));
     assertEquals(t.getValue(), "two");
   }
 
@@ -57,21 +54,21 @@ public class InMemoryTreeTest {
 
   @Test
   public void getExisting() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two");
     assertEquals(t.get(2).getValue(), "two");
   }
 
   @Test
   public void getNonExisting() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two");
     assertNull(t.get(3));
   }
 
   @Test
   public void putExisting() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "TWO!");
     Tree<Integer,String> st1 = t.get(2);
     Tree<Integer,String> st2 = t.put(2, "two");
@@ -82,7 +79,7 @@ public class InMemoryTreeTest {
 
   @Test
   public void putNew() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two");
     assertTrue(t.contains(2));
     assertEquals(t.get(2).getValue(), "two");
@@ -90,7 +87,7 @@ public class InMemoryTreeTest {
 
   @Test
   public void iterator() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     t.put(2, "two");
     t.put(3, "three");
     t.put(4, "four");
@@ -110,7 +107,7 @@ public class InMemoryTreeTest {
 
   @Test
   public void correctSize() {
-    Tree<Integer,String> t = new InMemoryTree<Integer,String>(1, "one");
+    Tree<Integer,String> t = new InMemoryTree<Integer,String>("one");
     assertEquals(t.size(), 0);
     t.put(2, "two");
     t.put(3, "three");
