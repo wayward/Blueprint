@@ -16,6 +16,7 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.blueprint.impl.BeanKeyResolver;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -152,6 +153,18 @@ public class BlueprintTest {
     TestConfiguration cfg = createTestBlueprint();
     assertTrue(cfg.key1());
     assertTrue(cfg.keyTwo());
+  }
+
+  @Test
+  public void keyResolution() {
+    TestBeanConfiguration cfg = Blueprint.create(TestBeanConfiguration.class, testTree,
+            new BeanKeyResolver());
+    assertEquals(cfg.getServiceName(), "DummyService");
+    assertTrue(cfg.isActive());
+    assertEquals(cfg.getBackupHours().size(), 3);
+    assertEquals(cfg.http().get("host"), "localhost");
+    assertEquals(cfg.db().getImpl(), java.util.Random.class);
+    assertEquals(cfg.protocols().get("telnet").getName(), "Telnet");
   }
 
   /* Privates ------------------------------------------------------- */

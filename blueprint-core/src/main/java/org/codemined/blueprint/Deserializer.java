@@ -16,7 +16,6 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.codemined.util.Types;
 
@@ -154,7 +153,7 @@ class Deserializer {
    * @return Deserialized instance of the given interface type.
    */
   private <T> T deserializeInterface(Class<T> type, ConfigTree<?> cfg, Path<String> cfgPath) {
-    return new Stub<T>(type, cfg, cfgPath, this, new IdentityKeyResolver()).getProxy();
+    return new Stub<T>(type, cfg, cfgPath, this, keyResolver).getProxy();
   }
 
 
