@@ -48,14 +48,19 @@ class Deserializer {
 
   private final ClassLoader classLoader;
 
+  private final KeyResolver keyResolver;
 
-  public Deserializer(ClassLoader classLoader) {
+  public Deserializer(ClassLoader classLoader, KeyResolver keyResolver) {
     this.classLoader = classLoader;
+    this.keyResolver = keyResolver;
   }
 
 
   @SuppressWarnings("unchecked")
-  public <T> T deserialize(Class<?> returnType, Class<?> hintedType, String key, ConfigTree<?> cfg) {
+  public <T> T deserialize(Class<?> returnType,
+                           Class<?> hintedType,
+                           String key,
+                           ConfigTree<?> cfg) {
 
     /* Maps and collections require a type hint to use as element type. */
     if (Map.class.isAssignableFrom(returnType)) {

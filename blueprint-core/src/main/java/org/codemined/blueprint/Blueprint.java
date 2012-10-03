@@ -46,7 +46,7 @@ public class Blueprint {
   public static <T> T create(Class<T> iface, ConfigTree<?> tree, KeyResolver keyResolver) {
     checkInterface(iface);
 
-    final Deserializer deserializer = new Deserializer(iface.getClassLoader());
+    final Deserializer deserializer = new Deserializer(iface.getClassLoader(), keyResolver);
     final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer, keyResolver);
     final T blueprint = stub.getProxy();
 

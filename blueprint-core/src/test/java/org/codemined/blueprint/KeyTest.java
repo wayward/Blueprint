@@ -50,7 +50,7 @@ public class KeyTest {
       mockTree.getTree("keyOverride"); result = mockTree;
       mockTree.getValue(); result = "42";
     }};
-    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader());
+    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader(), new IdentityKeyResolver());
     Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, new Path<String>(), deserializer, new IdentityKeyResolver());
     Method method = Iface.class.getMethod("keyOverridesMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
