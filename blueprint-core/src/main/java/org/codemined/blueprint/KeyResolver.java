@@ -16,12 +16,19 @@
 
 package org.codemined.blueprint;
 
+import org.codemined.blueprint.impl.BeanKeyResolver;
+import org.codemined.blueprint.impl.CamelCaseResolver;
+import org.codemined.blueprint.impl.IdentityKeyResolver;
+
 /**
  * Resolves the name of the configuration key to look up based on the method being called.
  *
  * @author Zoran Rilak
  */
 public interface KeyResolver {
+  public static final KeyResolver IDENTITY = new IdentityKeyResolver();
+  public static final KeyResolver CAMEL_CASE = new CamelCaseResolver();
+  public static final KeyResolver BEAN = new BeanKeyResolver();
 
   public String resolve(String methodName);
 

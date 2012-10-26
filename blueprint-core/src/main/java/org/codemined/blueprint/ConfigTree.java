@@ -19,15 +19,9 @@ package org.codemined.blueprint;
 import java.util.List;
 import java.util.Set;
 
-/**
- * <p>In-memory tree.</p>
- * 
- * <p><em>NOT THREAD-SAFE.</em></p>
- *
- * TODO make abstract, remove `value'
- *
- */
+
 public abstract class ConfigTree<T extends ConfigTree<T>> {
+
 
   public abstract String getValue();
 

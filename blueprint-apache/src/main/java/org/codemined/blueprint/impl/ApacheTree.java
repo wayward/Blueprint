@@ -21,6 +21,7 @@ import org.apache.commons.configuration.Configuration;
 import org.codemined.blueprint.ConfigTree;
 import org.codemined.util.Strings;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -37,6 +38,11 @@ public class ApacheTree extends ConfigTree<ApacheTree> {
 
   private final HashMap<String, ApacheTree> subTrees;
 
+
+  public ApacheTree(File file) {
+    this()
+  }
+
   public ApacheTree(Configuration... cfgs) {
     this(null, null, new CompositeConfiguration());
 
@@ -50,7 +56,6 @@ public class ApacheTree extends ConfigTree<ApacheTree> {
     loadSubTrees();
   }
 
-
   protected ApacheTree(ApacheTree parent, String key, CompositeConfiguration config) {
     this.config = config;
     this.subTrees = new HashMap<String, ApacheTree>();
@@ -61,7 +66,6 @@ public class ApacheTree extends ConfigTree<ApacheTree> {
       this.configKey = Strings.join(".", parent.configKey, key);
     }
   }
-
 
   @Override
   public String getValue() {

@@ -29,7 +29,6 @@ import static org.testng.Assert.assertNull;
 @Test
 public class AbstractTreeTest {
 
-
   @Test
   public void getByPath_noSubTree() {
     InMemoryTree<Integer,String> t = new InMemoryTree<Integer,String>("one");

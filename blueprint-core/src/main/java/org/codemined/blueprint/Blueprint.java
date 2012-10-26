@@ -31,6 +31,49 @@ import java.util.List;
  */
 public class Blueprint {
 
+  /**
+   * @author Zoran Rilak
+   * @version 0.1
+   * @since 0.1
+   */
+  private static class Builder<T> {
+    private Class<T> iface;
+    private CompositeTree compositeTree;
+    private KeyResolver keyResolver;
+
+    Builder(Class<T> iface) {
+      this.iface = iface;
+      this.compositeTree = new CompositeTree();
+      this.keyResolver = KeyResolver.IDENTITY;
+    }
+
+    Builder<T> from(ConfigTree<?> tree) {
+      compositeTree.add(tree);
+      return this;
+    }
+
+    Builder<T> from(String fileName) {
+
+    }
+
+    Builder<T> from(String fileName, Source.Format format) {
+      compositeTree.add(format.wrap(fileName));
+      return this;
+    }
+
+    Builder<T> withKeyResolver(KeyResolver keyResolver) {
+      this.keyResolver = keyResolver;
+      return this;
+    }
+
+    T build() {
+      return Blueprint.create(iface, compositeTree, keyResolver);
+    }
+  }
+
+  public static <T> Builder<T> of(Class<T> iface) {
+    return new Builder<T>(iface);
+  }
 
   public static <T> T create(Class<T> iface, ConfigTree<?> tree) {
     return create(iface, tree, new IdentityKeyResolver());
@@ -48,9 +91,7 @@ public class Blueprint {
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader(), keyResolver);
     final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer, keyResolver);
-    final T blueprint = stub.getProxy();
-
-    return blueprint;
+    return stub.getProxy();
   }
 
 
