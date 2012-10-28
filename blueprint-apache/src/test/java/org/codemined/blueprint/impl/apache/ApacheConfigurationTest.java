@@ -16,79 +16,52 @@
 
 package org.codemined.blueprint.impl.apache;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.codemined.blueprint.*;
+import org.codemined.blueprint.impl.ApacheTree;
+import org.testng.annotations.Test;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import static org.testng.Assert.*;
+
 /**
  * @author Zoran Rilak
  */
-/*
 @Test
-public class BlueprintTest {
+public class ApacheConfigurationTest {
 
-  private static final String VALID_CONF = "src/test/resources/test.properties";
+  private static final String VALID_CONF = "test.properties";
 
-  private static final String INVALID_CONF = "src/test/resources/test-failing-validations.properties";
 
   @Test
-  public TestConfiguration createTestBlueprint() {
+  public TestInterface createBlueprintFromApacheTree() {
     try {
-
       PropertiesConfiguration pc = new PropertiesConfiguration(VALID_CONF);
-      pc.setDelimiterParsingDisabled(true);
-      pc.refresh();
-      return Blueprint.create(TestConfiguration.class, new ApacheTree(pc));
+      return Blueprint.create(TestInterface.class, new ApacheTree(pc));
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
-    } catch (ConfigurationValidationException e) {
-      throw new RuntimeException(e);
     }
-  }
-
-  @Test(expectedExceptions = IllegalArgumentException.class)
-  public void rejectsClasses()
-          throws ConfigurationException, ConfigurationValidationException {
-    Blueprint.create(Class.class, new ApacheTree(new PropertiesConfiguration(VALID_CONF)));
-  }
-
-  @Test
-  public void validationFails() {
-    try {
-      PropertiesConfiguration pc = new PropertiesConfiguration(INVALID_CONF);
-      pc.setDelimiterParsingDisabled(true);
-      pc.refresh();
-      Blueprint.create(TestConfiguration.class, new ApacheTree(pc));
-      fail();
-
-    } catch (ConfigurationException e) {
-      throw new RuntimeException(e);
-
-    } catch (ConfigurationValidationException e) {
-      assertEquals(e.getFailedValidations().size(), 1);
-    }
-  }
-
-  @Test
-  public void methodsFromObjectBehaveNormally() {
-    TestConfiguration cfg = createTestBlueprint();
-    assertNotNull(cfg.toString());
-    assertTrue(TestConfiguration.class.isInstance(cfg));
-    assertEquals(cfg.hashCode(), cfg.hashCode());
-    assertNotEquals(cfg.hashCode(), createTestBlueprint().hashCode());
-    assertTrue(cfg.equals(cfg));
-    assertFalse(cfg.equals(this));
   }
 
   @Test
   public void simpleDeserialization() {
-    TestConfiguration cfg = createTestBlueprint();
-    assertEquals(cfg.serviceName(), "BlueprintTestService");
+    TestInterface cfg = createBlueprintFromApacheTree();
+    assertEquals(cfg.serviceName(), "TestService");
     assertTrue(cfg.isActive());
-    assertEquals(cfg.timeout(), 10);
+    assertEquals(cfg.timeout(), 15);
     assertEquals(cfg.tempDir(), new File("/tmp/blueprint"));
   }
 
   @Test
   public void collectionDeserialization() {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertEquals(cfg.backupHours(Integer.class).size(), 3);
     Iterator<Integer> iter = cfg.backupHours(Integer.class).iterator();
     assertEquals(iter.next().intValue(), 3);
@@ -96,14 +69,14 @@ public class BlueprintTest {
     assertEquals(iter.next().intValue(), 18);
 
     assertEquals(cfg.activeBackupDays().getClass(), ArrayList.class);
-    assertEquals(cfg.activeBackupDays().size(), 7);
-    assertEquals(cfg.activeBackupDays().get(0), true);
-    assertEquals(cfg.activeBackupDays().get(1), false);
+    assertEquals(cfg.activeBackupDays().length, 7);
+    assertEquals(cfg.activeBackupDays()[0], true);
+    assertEquals(cfg.activeBackupDays()[1], false);
   }
 
   @Test
   public void mapDeserialization() {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertEquals(cfg.http().size(), 3);
     assertEquals(cfg.http().get("host"), "localhost");
     assertEquals(cfg.http().get("port"), "65536");
@@ -115,12 +88,12 @@ public class BlueprintTest {
   @Test
   public void typeHinting()
           throws MalformedURLException {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertEquals(cfg.state(String.class), "TRUE");
     assertTrue(cfg.state(Boolean.class));
-    assertEquals(cfg.state(TestConfiguration._State.class), TestConfiguration._State.TRUE);
+    assertEquals(cfg.state(TestInterface._State.class), TestInterface._State.TRUE);
     assertEquals(cfg.deployUrl().getClass(), URL.class);
-    assertEquals(cfg.deployUrl(), new URL("http://www.codemined.org/Blueprint"));
+    assertEquals(cfg.deployUrl(), new URL("http://www.codemined.org/blueprint/"));
     cfg.deployUrl().getHost();
   }
 
@@ -128,7 +101,7 @@ public class BlueprintTest {
   @SuppressWarnings("unchecked")
   public void typeHintPrecedence()
           throws MalformedURLException {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertEquals(cfg.typeHintDemo1().getClass(), A.class);
     assertEquals(cfg.typeHintDemo1().toString(), "1:A");
     assertEquals(cfg.typeHintDemo1(A1.class).getClass(), A1.class);
@@ -142,25 +115,24 @@ public class BlueprintTest {
 
   @Test
   public void interfaceDeserialization() {
-    TestConfiguration cfg = createTestBlueprint();
-    assertTrue(TestConfiguration._DB.class.isInstance(cfg.db()));
+    TestInterface cfg = createBlueprintFromApacheTree();
+    assertTrue(TestInterface._DB.class.isInstance(cfg.db()));
     assertTrue(cfg.db().development().isTemporary());
     assertFalse(cfg.db().production().isTemporary());
   }
 
   @Test
   public void classDeserialization() {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertSame(cfg.db().impl(), java.util.Random.class);
     assertSame(cfg.db().impl(Class.class), java.util.Random.class);
   }
 
   @Test
   public void overridingKeys() {
-    TestConfiguration cfg = createTestBlueprint();
+    TestInterface cfg = createBlueprintFromApacheTree();
     assertTrue(cfg.key1());
     assertTrue(cfg.keyTwo());
   }
 
 }
-*/

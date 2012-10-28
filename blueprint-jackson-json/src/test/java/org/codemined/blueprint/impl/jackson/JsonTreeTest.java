@@ -43,19 +43,19 @@ public class JsonTreeTest {
   public void readsFirstLevelValues()
           throws IOException {
     JsonTree t = loadTree();
-    assertEquals(t.getTree("name").getValue(), "Donald Duck");
-    assertEquals(t.getTree("age").getValue(), "71");
-    assertEquals(t.getTree("family").getValue(), null);
+    assertEquals(t.getNode("name").getValue(), "Donald Duck");
+    assertEquals(t.getNode("age").getValue(), "71");
+    assertEquals(t.getNode("family").getValue(), null);
   }
 
   @Test
   public void readsNestedValues() {
     JsonTree t = loadTree();
-    assertEquals(t.getTree("family").getTree("mother").getValue(), "Hortense McDuck");
-    assertEquals(t.getTree("family").getTree("nephews").getList().get(0).getValue(), "Huey");
-    assertEquals(t.getTree("family").getTree("nephews").getList().get(1).getValue(), "Dewey");
-    assertEquals(t.getTree("family").getTree("nephews").getList().get(2).getValue(), "Louie");
-    assertEquals(t.getTree("family").getTree("married").getValue(), "false");
+    assertEquals(t.getNode("family").getNode("mother").getValue(), "Hortense McDuck");
+    assertEquals(t.getNode("family").getNode("nephews").getList().get(0).getValue(), "Huey");
+    assertEquals(t.getNode("family").getNode("nephews").getList().get(1).getValue(), "Dewey");
+    assertEquals(t.getNode("family").getNode("nephews").getList().get(2).getValue(), "Louie");
+    assertEquals(t.getNode("family").getNode("married").getValue(), "false");
   }
 
 }

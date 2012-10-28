@@ -33,16 +33,16 @@ public class ValidationTest {
   @Test(expectedExceptions = ConfigurationValidationException.class)
   public void rejectsOutOfRange()
           throws ConfigurationValidationException {
-    TestConfigTree cfg = createTree();
-    cfg.getTree("hours").setValue("25");
+    TestTree cfg = createTree();
+    cfg.getNode("hours").setValue("25");
     ValidatedBlueprint.create(ValidatingConfiguration.class, cfg);
   }
 
   /* Privates ------------------------------------------------------- */
 
 
-  private TestConfigTree createTree() {
-    TestConfigTree t = new TestConfigTree();
+  private TestTree createTree() {
+    TestTree t = new TestTree();
     t.put("hours", "4");
     t.put("dayOfWeek", "Thursday");
     t.put("birthday", "23/11/1878");

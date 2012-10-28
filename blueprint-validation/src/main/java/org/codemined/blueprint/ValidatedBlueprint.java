@@ -35,14 +35,14 @@ public class ValidatedBlueprint {
   private static final Object[] NULL_HINT = new Object[] { null };
 
 
-  public static <T> T create(Class<T> iface, ConfigTree tree)
+  public static <T> T create(Class<T> iface, ConfigNode node)
           throws ConfigurationValidationException {
-    return create(iface, tree, new IdentityKeyResolver());
+    return create(iface, node, new IdentityKeyResolver());
   }
 
-  public static <T> T create(Class<T> iface, ConfigTree tree, KeyResolver keyResolver)
+  public static <T> T create(Class<T> iface, ConfigNode node, KeyResolver keyResolver)
           throws ConfigurationValidationException {
-    T blueprint = Blueprint.create(iface, tree, keyResolver);
+    T blueprint = Blueprint.create(iface, node, keyResolver);
 
       List<String> failedValidations = validate(iface, blueprint,
               Validation.byProvider(HibernateValidator.class)

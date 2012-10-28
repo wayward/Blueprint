@@ -20,6 +20,8 @@ import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.codemined.util.Strings;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,28 +38,36 @@ public class Blueprint {
    * @version 0.1
    * @since 0.1
    */
-  private static class Builder<T> {
+  public static class Builder<T> {
     private Class<T> iface;
     private CompositeTree compositeTree;
     private KeyResolver keyResolver;
 
     Builder(Class<T> iface) {
+      checkInterface(iface);
       this.iface = iface;
       this.compositeTree = new CompositeTree();
       this.keyResolver = KeyResolver.IDENTITY;
     }
 
-    Builder<T> from(ConfigTree<?> tree) {
-      compositeTree.add(tree);
+    Builder<T> from(ConfigNode<?> node) {
+      compositeTree.add(node);
       return this;
     }
 
-    Builder<T> from(String fileName) {
-
+    Builder<T> from(String fileName)
+            throws FileNotFoundException {
+      for (Source.Formats f : Source.Formats.values()) {
+        if (f.matches(fileName)) {
+          return this.from(fileName, f);
+        }
+      }
+      throw new BlueprintException("Unable to determine the format of the configuration file " + fileName);
     }
 
-    Builder<T> from(String fileName, Source.Format format) {
-      compositeTree.add(format.wrap(fileName));
+    Builder<T> from(String fileName, Source.Format format)
+            throws FileNotFoundException {
+      compositeTree.add(format.load(new FileInputStream(fileName)));
       return this;
     }
 
@@ -75,22 +85,22 @@ public class Blueprint {
     return new Builder<T>(iface);
   }
 
-  public static <T> T create(Class<T> iface, ConfigTree<?> tree) {
-    return create(iface, tree, new IdentityKeyResolver());
+  public static <T> T create(Class<T> iface, ConfigNode<?> node) {
+    return create(iface, node, new IdentityKeyResolver());
   }
 
   /**
    * Creates a blueprint object.
    *
    * @param iface the interface for configuration access.
-   * @param tree configuration tree.
+   * @param node configuration tree.
    * @return an instance implementing {@code iface} whose methods return values from the configuration.
    */
-  public static <T> T create(Class<T> iface, ConfigTree<?> tree, KeyResolver keyResolver) {
+  public static <T> T create(Class<T> iface, ConfigNode<?> node, KeyResolver keyResolver) {
     checkInterface(iface);
 
     final Deserializer deserializer = new Deserializer(iface.getClassLoader(), keyResolver);
-    final Stub<T> stub = new Stub<T>(iface, tree, new Path<String>(), deserializer, keyResolver);
+    final Stub<T> stub = new Stub<T>(iface, node, new Path<String>(), deserializer, keyResolver);
     return stub.getProxy();
   }
 

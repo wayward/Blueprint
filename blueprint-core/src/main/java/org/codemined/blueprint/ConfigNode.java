@@ -16,15 +16,24 @@
 
 package org.codemined.blueprint;
 
-import java.io.Reader;
+import java.util.List;
+import java.util.Set;
 
-/**
- * @author Zoran Rilak
- */
-public interface ConfigTree<T extends ConfigNode> {
 
-  void load(Reader reader);
+public interface ConfigNode<T extends ConfigNode<T>> {
 
-  T getRootNode();
+  String getValue();
+
+  /**
+   * Returns an empty list if this tree has no array content.
+   * @return
+   */
+  List<T> getList();
+
+  boolean containsNode(String key);
+
+  T getNode(String key);
+
+  Set<String> keySet();
 
 }

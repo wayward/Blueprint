@@ -24,22 +24,22 @@ import java.util.Set;
 /**
  * @author Zoran Rilak
  */
-public class TestConfigTree extends ConfigTree<TestConfigTree> {
+public class TestNode implements ConfigNode<TestNode> {
 
   String value;
 
-  ArrayList<TestConfigTree> list;
+  ArrayList<TestNode> list;
 
-  HashMap<String, TestConfigTree> subTrees;
+  HashMap<String, TestNode> subTrees;
 
 
-  public TestConfigTree() {
+  public TestNode() {
     this.value = null;
-    this.list = new ArrayList<TestConfigTree>();
-    this.subTrees = new HashMap<String, TestConfigTree>();
+    this.list = new ArrayList<TestNode>();
+    this.subTrees = new HashMap<String, TestNode>();
   }
 
-  public TestConfigTree(String value) {
+  public TestNode(String value) {
     this();
     this.value = value;
   }
@@ -54,17 +54,17 @@ public class TestConfigTree extends ConfigTree<TestConfigTree> {
   }
 
   @Override
-  public List<TestConfigTree> getList() {
+  public List<TestNode> getList() {
     return list;
   }
 
   @Override
-  public boolean containsTree(String key) {
+  public boolean containsNode(String key) {
     return subTrees.containsKey(key);
   }
 
   @Override
-  public TestConfigTree getTree(String key) {
+  public TestNode getNode(String key) {
     return subTrees.get(key);
   }
 
@@ -73,16 +73,16 @@ public class TestConfigTree extends ConfigTree<TestConfigTree> {
     return subTrees.keySet();
   }
 
-  public TestConfigTree put(String key, String value) {
-    TestConfigTree t = new TestConfigTree(value);
+  public TestNode put(String key, String value) {
+    TestNode t = new TestNode(value);
     subTrees.put(key, t);
     return t;
   }
 
   public void setList(Object... elements) {
-    this.list = new ArrayList<TestConfigTree>();
+    this.list = new ArrayList<TestNode>();
     for (Object e : elements) {
-      this.list.add(new TestConfigTree(e.toString()));
+      this.list.add(new TestNode(e.toString()));
     }
   }
 

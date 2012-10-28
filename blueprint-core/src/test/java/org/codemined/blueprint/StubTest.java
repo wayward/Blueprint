@@ -31,7 +31,8 @@ public class StubTest {
 
   @Mocked Deserializer mockDeserializer;
 
-  @Mocked ConfigTree<?> mockTree;
+  @Mocked
+  ConfigNode<?> mockNode;
 
   @SuppressWarnings("unused")
   private interface ChildIface {
@@ -47,11 +48,11 @@ public class StubTest {
   public void picksUpInheritedMethods()
           throws Throwable {
     new Expectations() {{
-      mockTree.getTree("childMethod"); result = mockTree;
-      mockDeserializer.deserialize(Integer.class, null, "childMethod", mockTree); result = 42;
+      mockNode.getNode("childMethod"); result = mockNode;
+      mockDeserializer.deserialize(Integer.class, null, "childMethod", mockNode); result = 42;
     }};
     Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class,
-            mockTree, new Path<String>(), mockDeserializer, new IdentityKeyResolver());
+            mockNode, new Path<String>(), mockDeserializer, new IdentityKeyResolver());
     Method method = BlueprintIface.class.getMethod("childMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
 

@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @author Zoran Rilak
  */
-public interface TestConfiguration {
+public interface TestInterface {
 
   /* When creating objects to return as parsed configuration values,
    * Blueprint examines the return type for static factory methods to try and

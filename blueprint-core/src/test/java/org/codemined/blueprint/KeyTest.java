@@ -41,17 +41,18 @@ public class KeyTest {
     @Key("keyOverride") int keyOverridesMethod();
   }
 
-  @Mocked ConfigTree mockTree;
+  @Mocked
+  ConfigNode mockNode;
 
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
-      mockTree.getTree("keyOverride"); result = mockTree;
-      mockTree.getValue(); result = "42";
+      mockNode.getNode("keyOverride"); result = mockNode;
+      mockNode.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader(), new IdentityKeyResolver());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockTree, new Path<String>(), deserializer, new IdentityKeyResolver());
+    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockNode, new Path<String>(), deserializer, new IdentityKeyResolver());
     Method method = Iface.class.getMethod("keyOverridesMethod");
     Object value = stub.invoke(stub.getProxy(), method, null);
     assertEquals(value, 42);

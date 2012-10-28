@@ -18,7 +18,7 @@ package org.codemined.blueprint.impl;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codemined.blueprint.ConfigTree;
+import org.codemined.blueprint.ConfigNode;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * @author Zoran Rilak
  */
-public class JsonTree extends ConfigTree<JsonTree> {
+public class JsonTree extends ConfigNode<JsonTree> {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -70,12 +70,12 @@ public class JsonTree extends ConfigTree<JsonTree> {
   }
 
   @Override
-  public boolean containsTree(String key) {
+  public boolean containsNode(String key) {
     return jsonNode.has(key);
   }
 
   @Override
-  public JsonTree getTree(String key) {
+  public JsonTree getNode(String key) {
     if (! jsonNode.isObject()) {
       return null;
     }

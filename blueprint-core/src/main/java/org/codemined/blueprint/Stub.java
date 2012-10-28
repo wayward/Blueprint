@@ -70,7 +70,7 @@ class Stub<I> implements InvocationHandler {
 
   private final Class<I> iface;
 
-  private final ConfigTree cfg;
+  private final ConfigNode cfg;
 
   private final Path<String> cfgPath;
 
@@ -84,7 +84,7 @@ class Stub<I> implements InvocationHandler {
 
 
   public Stub(Class<I> iface,
-              ConfigTree cfg,
+              ConfigNode cfg,
               Path<String> configPath,
               Deserializer deserializer,
               KeyResolver keyResolver) {
@@ -110,15 +110,16 @@ class Stub<I> implements InvocationHandler {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    final String key = getKeyFor(method);
+
     // mark the context in which we're going to execute
-    Context.getThreadInstance().setContext(method, args, iface, cfgPath);
+    Context.getThreadInstance().setContext(method, args, iface, cfgPath.to(key));
 
     // route methods not declared on the blueprint interface to self
     if (method.getDeclaringClass() == Object.class) {
       return method.invoke(this, args);
     }
 
-    final String key = getKeyFor(method);
     // Values are cached by (method, args) pairs to support runtime type hints.
     MethodInvocation invocation = new MethodInvocation(method, args);
     Object o = cache.get(invocation);
@@ -126,11 +127,11 @@ class Stub<I> implements InvocationHandler {
       // Get the tree whose value will be passed to the deserializer.
       // For special methods ($value, $asMap), use the tree already associated
       // with this stub instead of looking up children trees.
-      ConfigTree t;
+      ConfigNode t;
       if (key == null) {
         t = cfg;
       } else {
-        t = cfg.getTree(key);
+        t = cfg.getNode(key);
       }
       if (t == null) {
         throw new BlueprintException("Configuration key '" + key +

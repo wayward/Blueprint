@@ -47,10 +47,7 @@ public class ApacheTreeTest {
   @Test
   public ApacheTree loadTree() {
     try {
-      PropertiesConfiguration pc = new PropertiesConfiguration(TEST_FILE);
-      pc.setDelimiterParsingDisabled(true);
-      pc.refresh();
-      return new ApacheTree(pc);
+      return new ApacheTree(new PropertiesConfiguration(TEST_FILE));
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
     }
@@ -68,15 +65,15 @@ public class ApacheTreeTest {
     ApacheTree t = loadTree();
     assertEquals(t.keySet().size(), testProperties.firstLevelKeys().size());
     for (String k : testProperties.firstLevelKeys()) {
-      assertTrue(t.containsTree(k), "key '" + k + "' exists in properties but not in the tree");
+      assertTrue(t.containsNode(k), "key '" + k + "' exists in properties but not in the tree");
     }
   }
 
   @Test
   public void parsesArrays() {
     ApacheTree t = loadTree();
-    assertEquals(t.getTree("backupHours").getList().size(), 3);
-    assertEquals(t.getTree("activeBackupDays").getList().size(), 7);
+    assertEquals(t.getNode("backupHours").getList().size(), 3);
+    assertEquals(t.getNode("activeBackupDays").getList().size(), 7);
   }
 
 }
