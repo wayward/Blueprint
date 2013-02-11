@@ -17,6 +17,7 @@
 package org.codemined.blueprint;
 
 import org.codemined.blueprint.impl.BeanKeyResolver;
+import org.codemined.blueprint.source.Source;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,19 +35,18 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-  private static final ConfigNode TEST_NODE = new TestTree().withTestDefaults();
-
+  private final Source MOCK_SOURCE = MockSource.withTestDefaults();
 
   @Test
   @BeforeClass
   private TestInterface createTestBlueprint() {
-    return Blueprint.create(TestInterface.class, TEST_NODE);
+    return Blueprint.create(TestInterface.class, MOCK_SOURCE);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void rejectsClasses()
           throws ConfigurationValidationException {
-    Blueprint.create(Class.class, TEST_NODE);
+    Blueprint.create(Class.class, MOCK_SOURCE);
   }
 
   @Test
@@ -157,7 +157,10 @@ public class BlueprintTest {
 
   @Test
   public void keyResolution() {
-    TestBeanConfiguration cfg = Blueprint.create(TestBeanConfiguration.class, TEST_NODE,
+    TestBeanConfiguration cfg = Blueprint.create(
+            TestBeanConfiguration.class,
+            MOCK_SOURCE,
+            Path.ROOT,
             new BeanKeyResolver());
     assertEquals(cfg.getServiceName(), "DummyService");
     assertTrue(cfg.isActive());

@@ -19,7 +19,8 @@ package org.codemined.blueprint;
 import org.codemined.blueprint.impl.CamelCaseResolver;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Zoran Rilak
@@ -36,17 +37,17 @@ public class BuilderTest {
   @Test(dependsOnMethods = "createsBuilder")
   void createsBuilderFromTree() {
     TestInterface i = Blueprint.of(TestInterface.class)
-            .from(new TestTree().withTestDefaults())
+            .withSource(MockSource.withTestDefaults())
             .build();
     assertEquals(i.serviceName(), "DummyService");
   }
 
   @Test(dependsOnMethods = "createsBuilderFromTree")
   void createsBlueprintWithKeyResolver() {
-    TestTree t = new TestTree().withTestDefaults();
-    t.put("service_name", "DummyServiceUnderscored");
+    MockSource ms = MockSource.withTestDefaults();
+    ms.getRootNode().withChild("service_name", "DummyServiceUnderscored");
     TestInterface i = Blueprint.of(TestInterface.class)
-            .from(t)
+            .withSource(ms)
             .withKeyResolver(new CamelCaseResolver())
             .build();
     assertEquals(i.serviceName(), "DummyServiceUnderscored");

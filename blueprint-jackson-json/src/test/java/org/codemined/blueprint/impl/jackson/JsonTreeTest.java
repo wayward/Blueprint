@@ -14,12 +14,8 @@ package org.codemined.blueprint.impl.jackson;/*
  * limitations under the License.
  */
 
-import org.codemined.blueprint.impl.JsonTree;
+import org.codemined.blueprint.impl.JsonSource;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Zoran Rilak
@@ -31,31 +27,8 @@ public class JsonTreeTest {
 
 
   @Test
-  public static JsonTree loadTree() {
-    try {
-      return new JsonTree(TEST_FILE);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Test
-  public void readsFirstLevelValues()
-          throws IOException {
-    JsonTree t = loadTree();
-    assertEquals(t.getNode("name").getValue(), "Donald Duck");
-    assertEquals(t.getNode("age").getValue(), "71");
-    assertEquals(t.getNode("family").getValue(), null);
-  }
-
-  @Test
-  public void readsNestedValues() {
-    JsonTree t = loadTree();
-    assertEquals(t.getNode("family").getNode("mother").getValue(), "Hortense McDuck");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(0).getValue(), "Huey");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(1).getValue(), "Dewey");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(2).getValue(), "Louie");
-    assertEquals(t.getNode("family").getNode("married").getValue(), "false");
+  public static JsonSource loadTree() {
+    return null;
   }
 
 }

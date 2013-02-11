@@ -17,11 +17,9 @@
 package org.codemined.blueprint;
 
 import org.codemined.blueprint.impl.IdentityKeyResolver;
-import org.codemined.util.Path;
+import org.codemined.blueprint.source.Source;
 import org.codemined.util.Strings;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,34 +38,24 @@ public class Blueprint {
    */
   public static class Builder<T> {
     private Class<T> iface;
-    private CompositeTree compositeTree;
+    private Source source;
+    private Path rootPath;
     private KeyResolver keyResolver;
 
     Builder(Class<T> iface) {
       checkInterface(iface);
       this.iface = iface;
-      this.compositeTree = new CompositeTree();
+      this.rootPath = Path.ROOT;
       this.keyResolver = KeyResolver.IDENTITY;
     }
 
-    Builder<T> from(ConfigNode<?> node) {
-      compositeTree.add(node);
+    Builder<T> withSource(Source source) {
+      this.source = source;
       return this;
     }
 
-    Builder<T> from(String fileName)
-            throws FileNotFoundException {
-      for (Source.Formats f : Source.Formats.values()) {
-        if (f.matches(fileName)) {
-          return this.from(fileName, f);
-        }
-      }
-      throw new BlueprintException("Unable to determine the format of the configuration file " + fileName);
-    }
-
-    Builder<T> from(String fileName, Source.Format format)
-            throws FileNotFoundException {
-      compositeTree.add(format.load(new FileInputStream(fileName)));
+    Builder<T> atPath(Path path) {
+      this.rootPath = path;
       return this;
     }
 
@@ -77,7 +65,7 @@ public class Blueprint {
     }
 
     T build() {
-      return Blueprint.create(iface, compositeTree, keyResolver);
+      return Blueprint.create(iface, source, rootPath, keyResolver);
     }
   }
 
@@ -85,22 +73,22 @@ public class Blueprint {
     return new Builder<T>(iface);
   }
 
-  public static <T> T create(Class<T> iface, ConfigNode<?> node) {
-    return create(iface, node, new IdentityKeyResolver());
+  public static <T> T create(Class<T> iface, Source source) {
+    return create(iface, source, Path.ROOT, new IdentityKeyResolver());
   }
 
   /**
    * Creates a blueprint object.
    *
    * @param iface the interface for configuration access.
-   * @param node configuration tree.
+   * @param source
+   * @param  rootPath
    * @return an instance implementing {@code iface} whose methods return values from the configuration.
    */
-  public static <T> T create(Class<T> iface, ConfigNode<?> node, KeyResolver keyResolver) {
+  public static <T> T create(Class<T> iface, Source source, Path rootPath, KeyResolver keyResolver) {
     checkInterface(iface);
 
-    final Deserializer deserializer = new Deserializer(iface.getClassLoader(), keyResolver);
-    final Stub<T> stub = new Stub<T>(iface, node, new Path<String>(), deserializer, keyResolver);
+    final Stub<T> stub = new Stub<T>(iface, source, rootPath, keyResolver);
     return stub.getProxy();
   }
 

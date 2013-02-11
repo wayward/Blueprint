@@ -16,7 +16,7 @@
 
 package org.codemined.blueprint;
 
-import org.codemined.util.Path;
+import org.codemined.blueprint.source.Source;
 import org.codemined.util.Types;
 
 import java.lang.reflect.Array;
@@ -24,7 +24,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,31 +48,34 @@ class Deserializer {
 
   private final KeyResolver keyResolver;
 
-  public Deserializer(ClassLoader classLoader, KeyResolver keyResolver) {
+  private final Source source;
+
+
+  public Deserializer(ClassLoader classLoader, KeyResolver keyResolver, Source source) {
     this.classLoader = classLoader;
     this.keyResolver = keyResolver;
+    this.source = source;
   }
 
 
   @SuppressWarnings("unchecked")
   public <T> T deserialize(Class<?> returnType,
                            Class<?> hintedType,
-                           String key,
-                           ConfigNode<?> cfg) {
+                           Path path) {
 
     /* Maps and collections require a type hint to use as element type. */
     if (Map.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Maps require a non-null type hint");
       }
-      return (T) deserializeMap(hintedType, cfg);
+      return (T) deserializeMap(hintedType, path);
     }
 
     if (Collection.class.isAssignableFrom(returnType)) {
       if (hintedType == null) {
         throw new BlueprintException("Collections require a non-null type hint");
       }
-      return (T) deserializeCollection((Class<Collection>)returnType, hintedType, cfg);
+      return (T) deserializeCollection((Class<Collection>)returnType, hintedType, path);
     }
 
     /* Other (non-map, non-collection) return types will be superseded by the
@@ -89,35 +91,34 @@ class Deserializer {
     }
 
     if (returnType.isInterface()) {
-      Path<String> p = Context.getThreadInstance().getCfgPath().to(key);
-      return (T) deserializeInterface(returnType, cfg, p);
+      return (T) deserializeInterface(returnType, path);
     }
 
     if (Class.class.isAssignableFrom(returnType)) {
-      return (T) deserializeClass(cfg);
+      return (T) deserializeClass(path);
     }
 
     if (returnType.isArray()) {
-      return (T) deserializeArray(returnType, cfg);
+      return (T) deserializeArray(returnType, path);
     }
 
     /* if no special handling applies, deserialize as a simple type
     (through a static factory method or String ctor) */
-    return (T) deserializeSimpleType(returnType, cfg);
+    return (T) deserializeSimpleType(returnType, path);
   }
 
 
   /**
    *
    * @param elementType Type of values stored in the map.
-   * @param cfg Configuration cfg to deserialize from.
+   * @param path
    * @param <E> Element type.
    * @return Deserialized instance of the given map type.
    */
-  public <E> Map<String, E> deserializeMap(Class<E> elementType, ConfigNode<?> cfg) {
+  public <E> Map<String, E> deserializeMap(Class<E> elementType, Path path) {
     final Map<String, E> map = Reifier.reifyStringMap();
-    for (String key : cfg.keySet()) {
-      final E element = deserialize(elementType, null, key, cfg.getNode(key));
+    for (String key : source.getSubKeys(path)) {
+      final E element = deserialize(elementType, null, path.toNode(key));
       map.put(key, element);
     }
     return map;
@@ -128,18 +129,17 @@ class Deserializer {
    *
    * @param type Collection type to deserialize to.
    * @param elementType Type of elements contained in the collection.
-   * @param cfg Configuration cfg to deserialize from.
+   * @param path
    * @param <E> Element type.
    * @return Deserialized collection.
    */
   @SuppressWarnings("unchecked")
   private <E, T extends Collection<E>> T deserializeCollection(Class<T> type,
                                                             Class<E> elementType,
-                                                            ConfigNode<?> cfg) {
+                                                            Path path) {
     final T col = (T) Reifier.reifyCollection(type);
-    int i = 0;
-    for (ConfigNode<?> t : cfg.getList()) {
-      col.add(elementType.cast(deserialize(elementType, null, "[" + i + "]", t)));
+    for (int i = 0; i < source.getListSize(path); i++) {
+      col.add(elementType.cast(deserialize(elementType, null, path.toIndex(i))));
       i++;
     }
     return col;
@@ -149,37 +149,37 @@ class Deserializer {
   /**
    *
    * @param type Interface to deserialize to.
-   * @param cfg Configuration cfg to deserialize from.
+   * @param path
    * @param <T> Interface type.
    * @return Deserialized instance of the given interface type.
    */
-  private <T> T deserializeInterface(Class<T> type, ConfigNode<?> cfg, Path<String> cfgPath) {
-    return new Stub<T>(type, cfg, cfgPath, this, keyResolver).getProxy();
+  private <T> T deserializeInterface(Class<T> type, Path path) {
+    return new Stub<T>(type, source, path, keyResolver).getProxy();
   }
 
 
   /**
-   * @param cfg Configuration cfg to deserialize from.
+   * @param path
    * @return Deserialized class object.
    */
-  private Class<?> deserializeClass(ConfigNode<?> cfg) {
+  private Class<?> deserializeClass(Path path) {
     try {
-      return classLoader.loadClass(cfg.getValue());
+      return classLoader.loadClass(source.getStringValue(path));
     } catch (ClassNotFoundException e) {
       throw new BlueprintException(e);
     }
   }
 
-  private <T> T deserializeArray(Class<T> type, ConfigNode<?> cfg) {
+  private <T> T deserializeArray(Class<T> type, Path path) {
     Class<?> elementType = type.getComponentType();
-    List<? extends ConfigNode<?>> elements = cfg.getList();
+    int size = source.getListSize(path);
 
-    Object array = Array.newInstance(elementType, elements.size());
-    for (int i = 0; i < elements.size(); i++) {
+    Object array = Array.newInstance(elementType, size);
+    for (int i = 0; i < source.getListSize(path); i++) {
       if (elementType.isPrimitive()) {
-        Array.set(array, i, deserializeSimpleType(Types.boxed(elementType), elements.get(i)));
+        Array.set(array, i, deserializeSimpleType(Types.boxed(elementType), path.toIndex(i)));
       } else {
-        Array.set(array, i, deserialize(elementType, null, "[" + i + "]", elements.get(i)));
+        Array.set(array, i, deserialize(elementType, null, path.toIndex(i)));
       }
     }
 
@@ -189,12 +189,12 @@ class Deserializer {
   /**
    *
    * @param type Simple type to deserialize to.
-   * @param cfg Configuration cfg to deserialize from.
+   * @param path
    * @param <T> Simple type (primitive, boxed or String).
    * @return Deserialized instance of a simple type.
    */
-  private <T> T deserializeSimpleType(Class<T> type, ConfigNode<?> cfg) {
-    return deserializeSimpleTypeFromValue(type, cfg.getValue());
+  private <T> T deserializeSimpleType(Class<T> type, Path path) {
+    return deserializeSimpleTypeFromValue(type, source.getStringValue(path));
   }
 
 

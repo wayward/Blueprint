@@ -27,28 +27,30 @@ public class ValidationTest {
   @Test
   public void validates()
           throws ConfigurationValidationException {
-    ValidatedBlueprint.create(ValidatingConfiguration.class, createTree());
+    ValidatedBlueprint.create(ValidatingConfiguration.class, createMockSource());
   }
 
   @Test(expectedExceptions = ConfigurationValidationException.class)
   public void rejectsOutOfRange()
           throws ConfigurationValidationException {
-    TestTree cfg = createTree();
-    cfg.getNode("hours").setValue("25");
-    ValidatedBlueprint.create(ValidatingConfiguration.class, cfg);
+    MockSource ms = createMockSource();
+    ms.getRootNode().getChild("hours").setValue("25");
+    ValidatedBlueprint.create(ValidatingConfiguration.class, ms);
   }
 
   /* Privates ------------------------------------------------------- */
 
 
-  private TestTree createTree() {
-    TestTree t = new TestTree();
-    t.put("hours", "4");
-    t.put("dayOfWeek", "Thursday");
-    t.put("birthday", "23/11/1878");
-    t.put("names", null).setList("Felipe", "Cayetano", "Lopez", "Martinez", "Gonzales");
-    t.put("eMail", "chico@darkwood.net");
-    return t;
+  private MockSource createMockSource() {
+    MockSource s = new MockSource();
+    s.getRootNode()
+            .withChild("hours", "4")
+            .withChild("dayOfWeek", "Thursday")
+            .withChild("birthday", "23/11/1878")
+            .withChild("names", new Node()
+                    .withArrayItems("Felipe", "Cayetano", "Lopez", "Martinez", "Gonzales"))
+            .withChild("eMail", "chico@darkwood.net");
+    return s;
   }
 
 }

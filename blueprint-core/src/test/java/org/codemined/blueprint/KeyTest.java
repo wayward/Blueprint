@@ -16,15 +16,7 @@
 
 package org.codemined.blueprint;
 
-import mockit.Expectations;
-import mockit.Mocked;
-import org.codemined.blueprint.impl.IdentityKeyResolver;
-import org.codemined.util.Path;
 import org.testng.annotations.Test;
-
-import java.lang.reflect.Method;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * Tests for the Key annotation.
@@ -41,21 +33,10 @@ public class KeyTest {
     @Key("keyOverride") int keyOverridesMethod();
   }
 
-  @Mocked
-  ConfigNode mockNode;
-
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
-    new Expectations() {{
-      mockNode.getNode("keyOverride"); result = mockNode;
-      mockNode.getValue(); result = "42";
-    }};
-    Deserializer deserializer = new Deserializer(Iface.class.getClassLoader(), new IdentityKeyResolver());
-    Stub<Iface> stub = new Stub<Iface>(Iface.class, mockNode, new Path<String>(), deserializer, new IdentityKeyResolver());
-    Method method = Iface.class.getMethod("keyOverridesMethod");
-    Object value = stub.invoke(stub.getProxy(), method, null);
-    assertEquals(value, 42);
+    //TODO write this
   }
 
   /*

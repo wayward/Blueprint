@@ -16,10 +16,8 @@
 
 package org.codemined.blueprint.impl.apache;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.*;
-import org.codemined.blueprint.impl.ApacheTree;
+import org.codemined.blueprint.source.impl.PropertiesSource;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -40,19 +38,13 @@ public class ApacheConfigurationTest {
 
 
   @Test
-  public TestInterface createBlueprintFromApacheTree() {
-    try {
-      PropertiesConfiguration pc = new PropertiesConfiguration(VALID_CONF);
-      return Blueprint.create(TestInterface.class, new ApacheTree(pc));
-
-    } catch (ConfigurationException e) {
-      throw new RuntimeException(e);
-    }
+  public TestInterface createTestBlueprint() {
+    return Blueprint.create(TestInterface.class, new PropertiesSource(VALID_CONF));
   }
 
   @Test
   public void simpleDeserialization() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertEquals(cfg.serviceName(), "TestService");
     assertTrue(cfg.isActive());
     assertEquals(cfg.timeout(), 15);
@@ -61,7 +53,7 @@ public class ApacheConfigurationTest {
 
   @Test
   public void collectionDeserialization() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertEquals(cfg.backupHours(Integer.class).size(), 3);
     Iterator<Integer> iter = cfg.backupHours(Integer.class).iterator();
     assertEquals(iter.next().intValue(), 3);
@@ -76,7 +68,7 @@ public class ApacheConfigurationTest {
 
   @Test
   public void mapDeserialization() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertEquals(cfg.http().size(), 3);
     assertEquals(cfg.http().get("host"), "localhost");
     assertEquals(cfg.http().get("port"), "65536");
@@ -88,7 +80,7 @@ public class ApacheConfigurationTest {
   @Test
   public void typeHinting()
           throws MalformedURLException {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertEquals(cfg.state(String.class), "TRUE");
     assertTrue(cfg.state(Boolean.class));
     assertEquals(cfg.state(TestInterface._State.class), TestInterface._State.TRUE);
@@ -101,7 +93,7 @@ public class ApacheConfigurationTest {
   @SuppressWarnings("unchecked")
   public void typeHintPrecedence()
           throws MalformedURLException {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertEquals(cfg.typeHintDemo1().getClass(), A.class);
     assertEquals(cfg.typeHintDemo1().toString(), "1:A");
     assertEquals(cfg.typeHintDemo1(A1.class).getClass(), A1.class);
@@ -115,7 +107,7 @@ public class ApacheConfigurationTest {
 
   @Test
   public void interfaceDeserialization() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertTrue(TestInterface._DB.class.isInstance(cfg.db()));
     assertTrue(cfg.db().development().isTemporary());
     assertFalse(cfg.db().production().isTemporary());
@@ -123,14 +115,14 @@ public class ApacheConfigurationTest {
 
   @Test
   public void classDeserialization() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertSame(cfg.db().impl(), java.util.Random.class);
     assertSame(cfg.db().impl(Class.class), java.util.Random.class);
   }
 
   @Test
   public void overridingKeys() {
-    TestInterface cfg = createBlueprintFromApacheTree();
+    TestInterface cfg = createTestBlueprint();
     assertTrue(cfg.key1());
     assertTrue(cfg.keyTwo());
   }

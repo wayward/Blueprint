@@ -76,7 +76,7 @@ public class BlueprintException extends RuntimeException {
             " (in method " + ctxt.getMethod().getName()
             + "(" + Strings.join(", ", argStr) + ")"
             + ", for class " + ctxt.getIface().getCanonicalName()
-            + ", on config path '/" + Strings.join("/", ctxt.getCfgPath()) + "'"
+            + ", on config path '/" + ctxt.getPath().toString("/") + "'"
             + ")";
   }
 

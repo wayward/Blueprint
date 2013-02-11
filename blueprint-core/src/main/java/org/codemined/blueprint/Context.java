@@ -1,7 +1,5 @@
 package org.codemined.blueprint;
 
-import org.codemined.util.Path;
-
 import java.lang.reflect.Method;
 
 /**
@@ -21,14 +19,14 @@ public class Context {
   private Method method;
   private Object[] args;
   private Class iface;
-  private Path<String> cfgPath;
+  private Path cfgPath;
 
 
   public static Context getThreadInstance() {
     return threadContext.get();
   }
 
-  public void setContext(Method method, Object[] argClasses, Class iface, Path<String> cfgPath) {
+  public void setContext(Method method, Object[] argClasses, Class iface, Path cfgPath) {
     this.method = method;
     this.args = argClasses == null ? new Object[]{}: argClasses;
     this.iface = iface;
@@ -47,7 +45,7 @@ public class Context {
     return iface;
   }
 
-  public Path<String> getCfgPath() {
+  public Path getPath() {
     return cfgPath;
   }
 

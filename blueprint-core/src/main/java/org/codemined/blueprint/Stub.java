@@ -26,7 +26,7 @@ package org.codemined.blueprint;
  - Stub caching strategy might be configurable if we allow the configurations to change
    (but keep validations in mind: do we re-run them, and if so, when?) */
 
-import org.codemined.util.Path;
+import org.codemined.blueprint.source.Source;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -70,9 +70,9 @@ class Stub<I> implements InvocationHandler {
 
   private final Class<I> iface;
 
-  private final ConfigNode cfg;
+  private final Source source;
 
-  private final Path<String> cfgPath;
+  private final Path path;
 
   private final Deserializer deserializer;
 
@@ -84,17 +84,16 @@ class Stub<I> implements InvocationHandler {
 
 
   public Stub(Class<I> iface,
-              ConfigNode cfg,
-              Path<String> configPath,
-              Deserializer deserializer,
+              Source source,
+              Path rootPath,
               KeyResolver keyResolver) {
-    if (cfg == null) {
-      throw new NullPointerException();
+    if (source == null) {
+      throw new IllegalArgumentException("Null source");
     }
     this.iface = iface;
-    this.cfg = cfg;
-    this.cfgPath = configPath;
-    this.deserializer = deserializer;
+    this.source = source;
+    this.path = rootPath;
+    this.deserializer = new Deserializer(iface.getClassLoader(), keyResolver, source);
     this.keyResolver = keyResolver;
     this.cache = Collections.synchronizedMap(new HashMap<MethodInvocation, Object>());
     this.proxy = createProxy();
@@ -110,35 +109,30 @@ class Stub<I> implements InvocationHandler {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    final String key = getKeyFor(method);
-
-    // mark the context in which we're going to execute
-    Context.getThreadInstance().setContext(method, args, iface, cfgPath.to(key));
-
-    // route methods not declared on the blueprint interface to self
-    if (method.getDeclaringClass() == Object.class) {
+    // Do not proxy methods that aren't declared on the blueprint interface itself.
+    // This allows the programmer to overload methods like getClass() and use them
+    // to query the underlying configuration source.
+    // Although, I'm pretty sure this is a _bad idea_; but let's see how it goes.
+    // (To revert to the old behavior where nothing from Object gets proxied,
+    //  replace the `if' expression below with: method.getDeclaringClass == Object.class)
+    if (method.getDeclaringClass() != iface) {
       return method.invoke(this, args);
     }
 
-    // Values are cached by (method, args) pairs to support runtime type hints.
+    final String key = getKeyFor(method);
+    final Path p = (key == null) ? path : path.toNode(key);
+    Context.getThreadInstance().setContext(method, args, iface, path.toNode(key));
+
+    // values are cached by (method, args) pairs to support runtime type hinting.
     MethodInvocation invocation = new MethodInvocation(method, args);
+
     Object o = cache.get(invocation);
     if (o == null) {
-      // Get the tree whose value will be passed to the deserializer.
-      // For special methods ($value, $asMap), use the tree already associated
-      // with this stub instead of looking up children trees.
-      ConfigNode t;
-      if (key == null) {
-        t = cfg;
-      } else {
-        t = cfg.getNode(key);
-      }
-      if (t == null) {
+      if (! source.containsPath(p)) {
         throw new BlueprintException("Configuration key '" + key +
-                "' does not exist on path " + cfgPath);
+                "' does not exist on path " + p);
       }
-
-      o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), key, t);
+      o = deserializer.deserialize(invocation.getReturnType(), invocation.getHintedType(), p);
       cache.put(invocation, o);
     }
     return o;

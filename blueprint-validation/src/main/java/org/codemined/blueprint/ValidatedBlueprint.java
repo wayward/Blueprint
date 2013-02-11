@@ -17,6 +17,7 @@
 package org.codemined.blueprint;
 
 import org.codemined.blueprint.impl.IdentityKeyResolver;
+import org.codemined.blueprint.source.Source;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.method.MethodConstraintViolation;
 import org.hibernate.validator.method.MethodValidator;
@@ -35,14 +36,14 @@ public class ValidatedBlueprint {
   private static final Object[] NULL_HINT = new Object[] { null };
 
 
-  public static <T> T create(Class<T> iface, ConfigNode node)
+  public static <T> T create(Class<T> iface, Source source)
           throws ConfigurationValidationException {
-    return create(iface, node, new IdentityKeyResolver());
+    return create(iface, source, Path.ROOT, new IdentityKeyResolver());
   }
 
-  public static <T> T create(Class<T> iface, ConfigNode node, KeyResolver keyResolver)
+  public static <T> T create(Class<T> iface, Source source, Path rootPath, KeyResolver keyResolver)
           throws ConfigurationValidationException {
-    T blueprint = Blueprint.create(iface, node, keyResolver);
+    T blueprint = Blueprint.create(iface, source, rootPath, keyResolver);
 
       List<String> failedValidations = validate(iface, blueprint,
               Validation.byProvider(HibernateValidator.class)

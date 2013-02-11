@@ -25,6 +25,10 @@ import static org.testng.Assert.assertEquals;
 @Test
 public class JsonTest {
 
+  private static createTestBlueprint() {
+
+  }
+
   @Test
   public void readsArrays() {
     JsonTestConfiguration cfg = Blueprint.create(JsonTestConfiguration.class, JsonTreeTest.loadTree());

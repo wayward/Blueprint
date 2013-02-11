@@ -16,15 +16,26 @@
 
 package org.codemined.blueprint;
 
-import java.io.Reader;
+import org.testng.annotations.Test;
+
+import java.util.LinkedList;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Zoran Rilak
+ * @version 0.1
+ * @since 0.1
  */
-public interface ConfigTree<T extends ConfigNode> {
+@Test
+public class PathTest {
 
-  void load(Reader reader);
 
-  T getRootNode();
+  @Test
+  public void createsPath() {
+    assertEquals(new Path().size(), 0);
+    assertEquals(new Path(new LinkedList<Path.Component>(), new Path.NodeComponent("")).size(), 1);
+    assertEquals(new Path()._(""), 1);
+  }
 
 }
