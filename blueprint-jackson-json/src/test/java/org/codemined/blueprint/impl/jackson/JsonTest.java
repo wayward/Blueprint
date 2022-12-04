@@ -27,7 +27,7 @@ public class JsonTest {
 
   @Test
   public void readsArrays() {
-    JsonTestConfiguration cfg = Blueprint.create(JsonTestConfiguration.class, JsonTreeTest.loadTree());
+    JsonTestConfiguration cfg = Blueprint.create(JsonTestConfiguration.class, JsonNodeTest.loadTree());
     String[] n = cfg.family().nephews();
     assertEquals(n.length, 3);
     assertEquals(n[0], "Huey");

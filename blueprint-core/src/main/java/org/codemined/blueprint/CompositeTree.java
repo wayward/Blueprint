@@ -16,8 +16,6 @@
 
 package org.codemined.blueprint;
 
-import java.io.InputStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,57 +26,48 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @version 0.1
  * @since 0.1
  */
-public class CompositeTree implements ConfigTree {
+public class CompositeTree implements ConfigNode {
 
-  private List<ConfigNode<?>> nodes;
+  private final List<ConfigNode<?>> nodes;
 
 
   public CompositeTree() {
     this.nodes = new CopyOnWriteArrayList<ConfigNode<?>>();
   }
 
-  public void add(ConfigNode node) {
+  public void add(ConfigNode<?> node) {
     this.nodes.add(node);
   }
 
-  public CompositeTree with(ConfigNode node) {
+  public CompositeTree with(ConfigNode<?> node) {
     add(node);
     return this;
   }
 
   @Override
-  public void load(InputStream in) {
-    //FIXME This does not belong here.
+  public boolean hasValue() {
+    return false;
   }
 
   @Override
   public String getValue() {
-    String value = null;
-    for (ConfigNode t : nodes) {
-      value = t.getValue();
-      if (value != null) {
-        break;
-      }
-    }
-    return value;
+    return null;
   }
 
   @Override
-  public List<? extends ConfigNode> getList() {
-    List<? extends ConfigNode<?>> list = Collections.emptyList();
-    for (ConfigNode<?> t : nodes) {
-      list = t.getList();
-      if (! list.isEmpty()) {
-        break;
-      }
-    }
-    return list;
+  public boolean hasArrayNodes() {
+    return false;
   }
 
   @Override
-  public boolean containsNode(String key) {
+  public List<? extends ConfigNode<?>> getArrayNodes() {
+    return nodes;
+  }
+
+  @Override
+  public boolean containsKey(String key) {
     for (ConfigNode<?> t : nodes) {
-      if (t.containsNode(key)) {
+      if (t.containsKey(key)) {
         return true;
       }
     }
@@ -86,10 +75,10 @@ public class CompositeTree implements ConfigTree {
   }
 
   @Override
-  public ConfigNode<?> getNode(String key) {
+  public ConfigNode<?> getChildNode(String key) {
     ConfigNode<?> node = null;
     for (ConfigNode<?> t : nodes) {
-      node = t.getNode(key);
+      node = t.getChildNode(key);
       if (node != null) {
         break;
       }

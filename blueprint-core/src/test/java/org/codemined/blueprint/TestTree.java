@@ -21,33 +21,27 @@ import java.io.Reader;
 /**
  * @author Zoran Rilak
  */
-public class TestTree extends TestNode implements ConfigTree<TestNode> {
-
-  private TestNode rootNode;
-
-
+public class TestTree extends TestNode implements ConfigNode<TestNode> {
+  
   public TestTree() {
     load(null);
   }
 
-  @Override
-  public void load(Reader unused) {
-    rootNode = new TestNode();
+  public void load(Reader _unused) {
+    put("serviceName", "DummyService");
+    put("isActive", "true");
+    put("timeout", "15");
+    put("tempDir", "/tmp/blueprint");
+    put("deployUrl", "http://www.codemined.org/blueprint");
+    put("backupHours", null).setList("3", "8", "18");
+    put("activeBackupDays", null).setList("true", "false", "false", "true", "false", "true", "true");
 
-    rootNode.put("serviceName", "DummyService");
-    rootNode.put("isActive", "true");
-    rootNode.put("timeout", "15");
-    rootNode.put("tempDir", "/tmp/blueprint");
-    rootNode.put("deployUrl", "http://www.codemined.org/blueprint");
-    rootNode.put("backupHours", null).setList("3", "8", "18");
-    rootNode.put("activeBackupDays", null).setList("true", "false", "false", "true", "false", "true", "true");
-
-    TestNode http = rootNode.put("http", null);
+    TestNode http = put("http", null);
     http.put("host", "localhost");
     http.put("port", "65536");
     http.put("ssl", "true");
 
-    TestNode proto = rootNode.put("protocols", null);
+    TestNode proto = put("protocols", null);
     TestNode telnet = proto.put("telnet", "disabled");
     telnet.put("name", "Telnet");
     telnet.put("port", "25");
@@ -58,11 +52,11 @@ public class TestTree extends TestNode implements ConfigTree<TestNode> {
     dns.put("name", "DNS");
     dns.put("port", "53");
 
-    rootNode.put("state", "TRUE");
-    rootNode.put("typeHintDemo1", "1");
-    rootNode.put("typeHintDemo2", "2");
+    put("state", "TRUE");
+    put("typeHintDemo1", "1");
+    put("typeHintDemo2", "2");
 
-    TestNode db = rootNode.put("db", null);
+    TestNode db = put("db", null);
     db.put("impl", "java.util.Random");
     TestNode devel = db.put("development", null);
     devel.put("name", "devel");
@@ -71,13 +65,9 @@ public class TestTree extends TestNode implements ConfigTree<TestNode> {
     prod.put("name", "Production");
     prod.put("isTemporary", "false");
 
-    rootNode.put("key1", "true");
-    rootNode.put("key2", "true");
-  }
-
-  @Override
-  public TestNode getRootNode() {
-    return null;  //TODO implement TestTree#getRootNode
+    put("key1", "true");
+    put("key2", "true");
   }
 
 }
+

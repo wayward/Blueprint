@@ -34,7 +34,7 @@ public class ValidationTest {
   public void rejectsOutOfRange()
           throws ConfigurationValidationException {
     TestTree cfg = createTree();
-    cfg.getNode("hours").setValue("25");
+    cfg.getChildNode("hours").setValue("25");
     ValidatedBlueprint.create(ValidatingConfiguration.class, cfg);
   }
 

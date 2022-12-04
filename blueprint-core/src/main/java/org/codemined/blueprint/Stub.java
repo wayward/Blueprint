@@ -127,11 +127,11 @@ class Stub<I> implements InvocationHandler {
       // Get the tree whose value will be passed to the deserializer.
       // For special methods ($value, $asMap), use the tree already associated
       // with this stub instead of looking up children trees.
-      ConfigNode t;
+      ConfigNode<?> t;
       if (key == null) {
         t = cfg;
       } else {
-        t = cfg.getNode(key);
+        t = cfg.getChildNode(key);
       }
       if (t == null) {
         throw new BlueprintException("Configuration key '" + key +

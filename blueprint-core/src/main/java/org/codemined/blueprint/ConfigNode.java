@@ -20,19 +20,39 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * A node may contain:
+ * - A string value (#getValue)
+ * - Zero or more array nodes (#getArrayNodes)
+ * - Zero or more children nodes (#getChildrenNodes)
+ * @param <T>
+ */
 public interface ConfigNode<T extends ConfigNode<T>> {
 
+  boolean hasValue();
+  /**
+   * Returns the string associated with this node.
+   * If the node contains a list of values (#hasArrayNodes == true) but no string value, still returns null.
+   * @return
+   */
   String getValue();
 
   /**
-   * Returns an empty list if this tree has no array content.
+   * Returns true if this node contains an array.
    * @return
    */
-  List<T> getList();
+  boolean hasArrayNodes();
 
-  boolean containsNode(String key);
+  /**
+   * Returns a list of values stored under this key.
+   * The list will have a length of 0 if no values are stored under this key.
+   * @return
+   */
+  List<T> getArrayNodes();
 
-  T getNode(String key);
+  T getChildNode(String key);
+
+  boolean containsKey(String key);
 
   Set<String> keySet();
 

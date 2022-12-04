@@ -19,7 +19,7 @@ package org.codemined.blueprint.impl.apache;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.codemined.blueprint.*;
-import org.codemined.blueprint.impl.ApacheTree;
+import org.codemined.blueprint.impl.ApacheNode;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -36,14 +36,14 @@ import static org.testng.Assert.*;
 @Test
 public class ApacheConfigurationTest {
 
-  private static final String VALID_CONF = "test.properties";
+  private static final String VALID_CFG = "test.properties";
 
 
   @Test
   public TestInterface createBlueprintFromApacheTree() {
     try {
-      PropertiesConfiguration pc = new PropertiesConfiguration(VALID_CONF);
-      return Blueprint.create(TestInterface.class, new ApacheTree(pc));
+      PropertiesConfiguration pc = new PropertiesConfiguration(VALID_CFG);
+      return Blueprint.create(TestInterface.class, new ApacheNode(pc));
 
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
@@ -62,14 +62,15 @@ public class ApacheConfigurationTest {
   @Test
   public void collectionDeserialization() {
     TestInterface cfg = createBlueprintFromApacheTree();
-    assertEquals(cfg.backupHours(Integer.class).size(), 3);
-    Iterator<Integer> iter = cfg.backupHours(Integer.class).iterator();
-    assertEquals(iter.next().intValue(), 3);
-    assertEquals(iter.next().intValue(), 8);
-    assertEquals(iter.next().intValue(), 18);
 
-    assertEquals(cfg.activeBackupDays().getClass(), ArrayList.class);
-    assertEquals(cfg.activeBackupDays().length, 7);
+    assertEquals(cfg.backupHours(Integer.class).size(), 3);
+    Iterator<Integer> i = cfg.backupHours(Integer.class).iterator();
+    assertEquals(i.next().intValue(), 3);
+    assertEquals(i.next().intValue(), 8);
+    assertEquals(i.next().intValue(), 18);
+
+    assertEquals(cfg.activeBackupDays(Boolean.class).getClass(), ArrayList.class);  // deserialization into a concrete class
+    assertEquals(cfg.activeBackupDays().length, 7);           // deserialization into an array
     assertEquals(cfg.activeBackupDays()[0], true);
     assertEquals(cfg.activeBackupDays()[1], false);
   }

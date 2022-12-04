@@ -16,7 +16,6 @@
 
 package org.codemined.blueprint.impl;
 
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codemined.blueprint.ConfigNode;
 
@@ -26,24 +25,29 @@ import java.util.*;
 /**
  * @author Zoran Rilak
  */
-public class JsonTree extends ConfigNode<JsonTree> {
+public class JsonNode implements ConfigNode<JsonNode> {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private final JsonNode jsonNode;
+  private final org.codehaus.jackson.JsonNode jsonNode;
 
-  private ArrayList<JsonTree> listElements;
+  private ArrayList<JsonNode> listElements;
 
-  private HashMap<String, JsonTree> subTrees;
+  private HashMap<String, JsonNode> subTrees;
 
 
-  public JsonTree(String fileName)
+  public JsonNode(String fileName)
           throws IOException {
-    this(mapper.readTree(JsonTree.class.getClassLoader().getResourceAsStream(fileName)));
+    this(mapper.readTree(JsonNode.class.getClassLoader().getResourceAsStream(fileName)));
   }
 
-  protected JsonTree(JsonNode jsonNode) {
+  protected JsonNode(org.codehaus.jackson.JsonNode jsonNode) {
     this.jsonNode = jsonNode;
+  }
+
+  @Override
+  public boolean hasValue() {
+    return false;
   }
 
   @Override
@@ -56,35 +60,37 @@ public class JsonTree extends ConfigNode<JsonTree> {
   }
 
   @Override
-  public List<JsonTree> getList() {
-    if (! jsonNode.isArray()) {
-      return null;
-    }
-    if (this.listElements == null) {
-      this.listElements = new ArrayList<JsonTree>();
-      for (JsonNode node : jsonNode) {
-        listElements.add(new JsonTree(node));
+  public boolean hasArrayNodes() {
+    return jsonNode.isArray();
+  }
+
+  @Override
+  public List<JsonNode> getArrayNodes() {
+    if (this.hasArrayNodes() && (listElements == null)) {
+      listElements = new ArrayList<>();
+      for (org.codehaus.jackson.JsonNode node : jsonNode) {
+        listElements.add(new JsonNode(node));
       }
     }
     return listElements;
   }
 
   @Override
-  public boolean containsNode(String key) {
+  public boolean containsKey(String key) {
     return jsonNode.has(key);
   }
 
   @Override
-  public JsonTree getNode(String key) {
+  public JsonNode getChildNode(String key) {
     if (! jsonNode.isObject()) {
       return null;
     }
     if (this.subTrees == null) {
-      this.subTrees = new HashMap<String, JsonTree>();
+      this.subTrees = new HashMap<String, JsonNode>();
     }
-    JsonTree tree = this.subTrees.get(key);
+    JsonNode tree = this.subTrees.get(key);
     if (tree == null) {
-      tree = new JsonTree(jsonNode.get(key));
+      tree = new JsonNode(jsonNode.get(key));
       subTrees.put(key, tree);
     }
     return tree;

@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
 @Test
 public class BlueprintTest {
 
-  private static final ConfigNode TEST_NODE = new TestTree().withTestDefaults();
+  private static final ConfigNode<TestNode> TEST_NODE = new TestTree();
 
 
   @Test

@@ -36,14 +36,14 @@ public class BuilderTest {
   @Test(dependsOnMethods = "createsBuilder")
   void createsBuilderFromTree() {
     TestInterface i = Blueprint.of(TestInterface.class)
-            .from(new TestTree().withTestDefaults())
+            .from(new TestTree())
             .build();
     assertEquals(i.serviceName(), "DummyService");
   }
 
   @Test(dependsOnMethods = "createsBuilderFromTree")
   void createsBlueprintWithKeyResolver() {
-    TestTree t = new TestTree().withTestDefaults();
+    TestTree t = new TestTree();
     t.put("service_name", "DummyServiceUnderscored");
     TestInterface i = Blueprint.of(TestInterface.class)
             .from(t)

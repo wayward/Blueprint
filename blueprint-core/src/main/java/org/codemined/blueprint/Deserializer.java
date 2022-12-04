@@ -117,7 +117,7 @@ class Deserializer {
   public <E> Map<String, E> deserializeMap(Class<E> elementType, ConfigNode<?> cfg) {
     final Map<String, E> map = Reifier.reifyStringMap();
     for (String key : cfg.keySet()) {
-      final E element = deserialize(elementType, null, key, cfg.getNode(key));
+      final E element = deserialize(elementType, null, key, cfg.getChildNode(key));
       map.put(key, element);
     }
     return map;
@@ -138,8 +138,9 @@ class Deserializer {
                                                             ConfigNode<?> cfg) {
     final T col = (T) Reifier.reifyCollection(type);
     int i = 0;
-    for (ConfigNode<?> t : cfg.getList()) {
+    for (ConfigNode<?> t : cfg.getArrayNodes()) {
       col.add(elementType.cast(deserialize(elementType, null, "[" + i + "]", t)));
+//      col.add(elementType.cast(deserialize(elementType, null, Integer.toString(i), t)));
       i++;
     }
     return col;
@@ -172,7 +173,7 @@ class Deserializer {
 
   private <T> T deserializeArray(Class<T> type, ConfigNode<?> cfg) {
     Class<?> elementType = type.getComponentType();
-    List<? extends ConfigNode<?>> elements = cfg.getList();
+    List<? extends ConfigNode<?>> elements = cfg.getArrayNodes();
 
     Object array = Array.newInstance(elementType, elements.size());
     for (int i = 0; i < elements.size(); i++) {

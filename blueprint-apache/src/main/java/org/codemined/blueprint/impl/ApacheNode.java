@@ -17,17 +17,14 @@
 package org.codemined.blueprint.impl;
 
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.codemined.blueprint.BlueprintException;
 import org.codemined.blueprint.ConfigNode;
 import org.codemined.util.Strings;
 
 import java.util.*;
 
 /**
- * This implementation is far from optimal.
- * It instantiates plenty of objects as it traverses the tree to reach the required key.
- * On the upside, it guarantees that the lookups will always reflect the most recent state of
- * the underlying configuration object.  This is useful because Apache Configuration objects
- * can dynamically change by reloading at runtime.
  *
  * @author Zoran Rilak
  */
@@ -38,6 +35,12 @@ public class ApacheNode implements ConfigNode<ApacheNode> {
   /** Apache Configuration key corresponding to this tree.  Root tree contains an empty string (""). */
   protected String configKey;
 
+  public ApacheNode(Configuration config) {
+    this(null, "", config);
+    if (config instanceof HierarchicalConfiguration) {
+      throw new BlueprintException("Apache hierarchical configurations are not yet supported.");
+    }
+  }
 
   /**
    * Creates a node element.
@@ -75,32 +78,47 @@ public class ApacheNode implements ConfigNode<ApacheNode> {
 
 
   @Override
-  public String getValue() {
-    // values aren't cached to allow the changes in the
-    // underlying Apache Configuration to show through.
-    return config.getString(configKey);
+  public boolean hasValue() {
+    return config.getString("sdf", null) == null;
   }
 
   @Override
-  public List<ApacheNode> getList() {
-    // same as above, we're just going to enumerate
-    // the elements of the list returned by Apache Configuration.
+  public String getValue() {
+    // values aren't cached to allow the changes in the
+    // underlying Apache Configuration to show through.
+    if (configKey.contains("[")) {
+      String[] parts = configKey.split("[\\[\\]]");
+      return config.getStringArray(parts[0])[Integer.parseInt(parts[1])];
+    } else {
+      return config.getString(configKey, null);
+    }
+  }
+
+  @Override
+  public boolean hasArrayNodes() {
+    return config.getStringArray(configKey).length > 0;
+  }
+
+  @Override
+  public List<ApacheNode> getArrayNodes() {
     List<ApacheNode> list = new ArrayList<ApacheNode>();
-    for (int i = 0; i < config.getList(configKey).size(); i++) {
-      list.add(new ApacheNode(configKey, i, config));
+    String[] apacheAry = config.getStringArray(configKey);
+    for (int i = 0; i < apacheAry.length; i++) {
+      ApacheNode n = new ApacheNode(configKey, i, config);
+      list.add(n);
     }
     return list;
   }
 
   @Override
-  public boolean containsNode(String key) {
+  public boolean containsKey(String key) {
     String prefix = Strings.join(".", configKey, key);
     Iterator<String> iter = config.getKeys(prefix);
     return iter.hasNext();
   }
 
   @Override
-  public ApacheNode getNode(String key) {
+  public ApacheNode getChildNode(String key) {
     return new ApacheNode(configKey, key, config);
   }
 

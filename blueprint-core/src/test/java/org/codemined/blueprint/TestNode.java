@@ -35,7 +35,6 @@ public class TestNode implements ConfigNode<TestNode> {
 
   public TestNode() {
     this.value = null;
-    this.list = new ArrayList<TestNode>();
     this.subTrees = new HashMap<String, TestNode>();
   }
 
@@ -45,8 +44,18 @@ public class TestNode implements ConfigNode<TestNode> {
   }
 
   @Override
+  public boolean hasValue() {
+    return value != null;
+  }
+
+  @Override
   public String getValue() {
     return value;
+  }
+
+  @Override
+  public boolean hasArrayNodes() {
+    return list != null;
   }
 
   public void setValue(String value) {
@@ -54,17 +63,17 @@ public class TestNode implements ConfigNode<TestNode> {
   }
 
   @Override
-  public List<TestNode> getList() {
+  public List<TestNode> getArrayNodes() {
     return list;
   }
 
   @Override
-  public boolean containsNode(String key) {
+  public boolean containsKey(String key) {
     return subTrees.containsKey(key);
   }
 
   @Override
-  public TestNode getNode(String key) {
+  public TestNode getChildNode(String key) {
     return subTrees.get(key);
   }
 

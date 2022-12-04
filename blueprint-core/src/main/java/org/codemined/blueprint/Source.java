@@ -38,7 +38,7 @@ public class Source {
     private String suffix;
     private Pattern suffixPattern;
     private String moduleName;
-    private Class<? extends ConfigNode> treeClass;
+    private Class<? extends ConfigNode> nodeClass;
 
     private Formats(String suffix, String className, String moduleName) {
       this.suffix = suffix;
@@ -46,9 +46,9 @@ public class Source {
       this.moduleName = moduleName;
       // try to load the class responsible for handling files of this format
       try {
-        this.treeClass = Class.forName(className).asSubclass(ConfigNode.class);
+        this.nodeClass = Class.forName(className).asSubclass(ConfigNode.class);
       } catch (ClassNotFoundException e) {
-        this.treeClass = null;  /* no implementation found in classpath */
+        this.nodeClass = null;  /* no implementation found in classpath */
       } catch (ClassCastException e) {
         throw new RuntimeException(String.format(
                 "Wrong or outdated implementation for %s found in class path." +
@@ -59,16 +59,16 @@ public class Source {
 
     @Override
     public ConfigNode<?> load(InputStream in) {
-      if (treeClass == null) {
+      if (nodeClass == null) {
         throw new RuntimeException(String.format(
-                "The class responsible for handling %s files, was not found in class path." +
-                        "Please ensure that you are using the latest version of %s.",
+                "The class responsible for handling %s files was not found in class path. " +
+                        "Make sure you're using the latest version of %s.",
                 suffix, moduleName));
       }
 
       try {
-        ConfigNode<?> node = treeClass.newInstance();
-        node.load(in);
+        ConfigNode<?> node = nodeClass.newInstance();
+        load(in);
         return node;
       } catch (InstantiationException e) {
         throw new RuntimeException(e);

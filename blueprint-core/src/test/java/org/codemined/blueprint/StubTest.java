@@ -16,8 +16,7 @@
 
 package org.codemined.blueprint;
 
-import mockit.Expectations;
-import mockit.Mocked;
+import mockit.*;
 import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
@@ -48,7 +47,7 @@ public class StubTest {
   public void picksUpInheritedMethods()
           throws Throwable {
     new Expectations() {{
-      mockNode.getNode("childMethod"); result = mockNode;
+      mockNode.getChildNode("childMethod"); result = mockNode;
       mockDeserializer.deserialize(Integer.class, null, "childMethod", mockNode); result = 42;
     }};
     Stub<BlueprintIface> stub = new Stub<BlueprintIface>(BlueprintIface.class,

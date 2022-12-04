@@ -16,8 +16,7 @@
 
 package org.codemined.blueprint;
 
-import mockit.Expectations;
-import mockit.Mocked;
+import mockit.*;
 import org.codemined.blueprint.impl.IdentityKeyResolver;
 import org.codemined.util.Path;
 import org.testng.annotations.Test;
@@ -42,13 +41,13 @@ public class KeyTest {
   }
 
   @Mocked
-  ConfigNode mockNode;
+  ConfigNode<?> mockNode;
 
   @Test
   public void keyAnnotationOverridesMapping()
           throws Throwable {
     new Expectations() {{
-      mockNode.getNode("keyOverride"); result = mockNode;
+      mockNode.getChildNode("keyOverride"); result = mockNode;
       mockNode.getValue(); result = "42";
     }};
     Deserializer deserializer = new Deserializer(Iface.class.getClassLoader(), new IdentityKeyResolver());

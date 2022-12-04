@@ -14,7 +14,7 @@ package org.codemined.blueprint.impl.jackson;/*
  * limitations under the License.
  */
 
-import org.codemined.blueprint.impl.JsonTree;
+import org.codemined.blueprint.impl.JsonNode;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -25,15 +25,15 @@ import static org.testng.Assert.assertEquals;
  * @author Zoran Rilak
  */
 @Test
-public class JsonTreeTest {
+public class JsonNodeTest {
 
   private static final String TEST_FILE = "test.json";
 
 
   @Test
-  public static JsonTree loadTree() {
+  public static JsonNode loadTree() {
     try {
-      return new JsonTree(TEST_FILE);
+      return new JsonNode(TEST_FILE);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -42,20 +42,20 @@ public class JsonTreeTest {
   @Test
   public void readsFirstLevelValues()
           throws IOException {
-    JsonTree t = loadTree();
-    assertEquals(t.getNode("name").getValue(), "Donald Duck");
-    assertEquals(t.getNode("age").getValue(), "71");
-    assertEquals(t.getNode("family").getValue(), null);
+    JsonNode t = loadTree();
+    assertEquals(t.getChildNode("name").getValue(), "Donald Duck");
+    assertEquals(t.getChildNode("age").getValue(), "71");
+    assertEquals(t.getChildNode("family").getValue(), null);
   }
 
   @Test
   public void readsNestedValues() {
-    JsonTree t = loadTree();
-    assertEquals(t.getNode("family").getNode("mother").getValue(), "Hortense McDuck");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(0).getValue(), "Huey");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(1).getValue(), "Dewey");
-    assertEquals(t.getNode("family").getNode("nephews").getList().get(2).getValue(), "Louie");
-    assertEquals(t.getNode("family").getNode("married").getValue(), "false");
+    JsonNode t = loadTree();
+    assertEquals(t.getChildNode("family").getChildNode("mother").getValue(), "Hortense McDuck");
+    assertEquals(t.getChildNode("family").getChildNode("nephews").getArrayNodes().get(0).getValue(), "Huey");
+    assertEquals(t.getChildNode("family").getChildNode("nephews").getArrayNodes().get(1).getValue(), "Dewey");
+    assertEquals(t.getChildNode("family").getChildNode("nephews").getArrayNodes().get(2).getValue(), "Louie");
+    assertEquals(t.getChildNode("family").getChildNode("married").getValue(), "false");
   }
 
 }
