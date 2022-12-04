@@ -3,16 +3,30 @@ Blueprint: Type-Safe Configurations for Java
 
 Blueprint is a simple framework that makes reading configuration files more enjoyable.
 
+Say you have a db.properties file:
+
+    host = loco.example.org
+    port = 1433
+
+Blueprint lets you read it like so:
+
+    interface MyConfig {
+        String host();
+        int port();
+    }
+    MyConfig cfg = Blueprint.create(MyConfig.class, ...)
+
+    // cfg.host() == String, "loco.example.org"
+    // cfg.port() == int, 1443
+
 - The code resides [on GitHub](https://github.com/wayward/Blueprint).
-- There is also a small but attentive [mailing list](http://groups.google.com/group/blueprint-configuration).
+- There is a [mailing list](http://groups.google.com/group/blueprint-configuration).
 
 Features
--
-- automatic conversion to the desired type from strings in the configuration
-- deserialization types can be selected at runtime
-- hierarchical configurations can be accessed using the familiar
-`foo().bar().baz()` syntax
-- optional validation of the configuration object
+
+- `cfg.foo().bar.baz()` works on hierarchical configuration formats.
+- Strings are automatically converted to the target type.
+- Set validations to fail fast before your app begins to init.
 
 The Problem of Reading Configuration Files
 -
