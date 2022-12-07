@@ -159,9 +159,9 @@ public interface TestInterface {
 
   /* Concrete return type, type hint annotation and runtime type hint can all be present
    * simultaneously on a method.  Annotation takes precedence over the return type,
-   * and a runtime type hint trumps both.  Note, though, that no matter which type is
-   * determined to be the final required type for deserialization, it still has to be a
-   * subclass of the declaring method's return type.
+   * while a runtime type hint trumps both.
+   * Note though the determined deserialization type still has to be a subclass
+   * of the declaring method's return type.
    */
   A typeHintDemo1(Class<? extends A>... typeHint);
 

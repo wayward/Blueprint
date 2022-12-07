@@ -17,6 +17,7 @@
 package org.codemined.blueprint;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Pattern;
 
 /**
@@ -35,9 +36,9 @@ public class Source {
     PROPERTIES (".properties", "org.codemined.blueprint.impl.ApacheTree", "blueprint-apache"),
     JSON (".json", "org.codemined.blueprint.impl.JsonTree", "blueprint-jackson-json");
 
-    private String suffix;
-    private Pattern suffixPattern;
-    private String moduleName;
+    private final String suffix;
+    private final Pattern suffixPattern;
+    private final String moduleName;
     private Class<? extends ConfigNode> nodeClass;
 
     private Formats(String suffix, String className, String moduleName) {
@@ -51,8 +52,8 @@ public class Source {
         this.nodeClass = null;  /* no implementation found in classpath */
       } catch (ClassCastException e) {
         throw new RuntimeException(String.format(
-                "Wrong or outdated implementation for %s found in class path." +
-                        "Please ensure that you are using the latest version of %s.",
+                "Wrong or outdated implementation for %s found in class path. " +
+                "Please ensure that you are using the latest version of %s.",
                 className, moduleName));
       }
     }
@@ -62,17 +63,21 @@ public class Source {
       if (nodeClass == null) {
         throw new RuntimeException(String.format(
                 "The class responsible for handling %s files was not found in class path. " +
-                        "Make sure you're using the latest version of %s.",
+                "Make sure you're using the latest version of %s.",
                 suffix, moduleName));
       }
 
       try {
-        ConfigNode<?> node = nodeClass.newInstance();
+        ConfigNode<?> node = nodeClass.getDeclaredConstructor().newInstance();
         load(in);
         return node;
       } catch (InstantiationException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
       }
     }

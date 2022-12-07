@@ -16,16 +16,17 @@
 
 package org.codemined.blueprint;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
+
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Zoran Rilak
  */
-public interface ValidatingConfiguration {
+public interface ValidatedConfiguration {
 
-  /* Blueprint can validate methods against any javax.validation.constraints.*
+  /* Blueprint can validate methods against any jakarta.validation.constraints.*
    * annotations at the time the instance of your interface is created.
    * If a return value of any such method fails to validate, a BlueprintException
    * will be thrown to indicate that a valid blueprint cannot be created with the
@@ -42,13 +43,14 @@ public interface ValidatingConfiguration {
    * at creation time, much the same as above.
    */
   @NotNull
+  @NotEmpty
   String dayOfWeek();
 
   @Past
   Date birthday();
 
-  @UseType(String.class)
   @Size(min=1, max=6)
+  @UseType(String.class)
   List<String> names();
 
   @Pattern(regexp = "[\\w.]+@[\\w.]([\\w.])+")

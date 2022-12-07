@@ -16,7 +16,13 @@
 
 package org.codemined.blueprint;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 
 /**
  * @author Zoran Rilak
@@ -24,18 +30,26 @@ import org.testng.annotations.Test;
 @Test
 public class ValidationTest {
 
-  @Test
-  public void validates()
-          throws ConfigurationValidationException {
-    ValidatedBlueprint.create(ValidatingConfiguration.class, createTree());
+  private static Validator validator;
+
+  @BeforeClass
+  public static void setup() {
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    validator = factory.getValidator();
   }
 
-  @Test(expectedExceptions = ConfigurationValidationException.class)
+  @Test
+  public void validates()
+          throws ConstraintViolationException {
+    ValidatedBlueprint.create(ValidatedConfiguration.class, createTree());
+  }
+
+  @Test(expectedExceptions = ConstraintViolationException.class)
   public void rejectsOutOfRange()
-          throws ConfigurationValidationException {
+          throws ConstraintViolationException {
     TestTree cfg = createTree();
     cfg.getChildNode("hours").setValue("25");
-    ValidatedBlueprint.create(ValidatingConfiguration.class, cfg);
+    ValidatedBlueprint.create(ValidatedConfiguration.class, cfg);
   }
 
   /* Privates ------------------------------------------------------- */

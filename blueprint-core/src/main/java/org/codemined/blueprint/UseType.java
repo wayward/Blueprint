@@ -30,8 +30,7 @@ import java.lang.annotation.*;
 public @interface UseType {
 
   /** 
-   * When a method is annotated with a value here, Blueprint will expect the reified type
-   * to match this type.
+   * When a method is annotated with this, Blueprint will expect the reified type to match this type.
    */
   public Class<?> value();
 

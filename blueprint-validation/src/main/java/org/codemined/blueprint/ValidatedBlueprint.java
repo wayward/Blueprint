@@ -16,15 +16,15 @@
 
 package org.codemined.blueprint;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.executable.ExecutableValidator;
 import org.codemined.blueprint.impl.IdentityKeyResolver;
-import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.method.MethodConstraintViolation;
-import org.hibernate.validator.method.MethodValidator;
 
-import javax.validation.Validation;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -35,23 +35,23 @@ public class ValidatedBlueprint {
   private static final Object[] NULL_HINT = new Object[] { null };
 
 
-  public static <T> T create(Class<T> iface, ConfigNode node)
-          throws ConfigurationValidationException {
+  public static <T> T create(Class<T> iface, ConfigNode<?> node)
+          throws ConstraintViolationException {
     return create(iface, node, new IdentityKeyResolver());
   }
 
-  public static <T> T create(Class<T> iface, ConfigNode node, KeyResolver keyResolver)
-          throws ConfigurationValidationException {
+  public static <T> T create(Class<T> iface, ConfigNode<?> node, KeyResolver keyResolver)
+          throws ConstraintViolationException {
     T blueprint = Blueprint.create(iface, node, keyResolver);
 
-      List<String> failedValidations = validate(iface, blueprint,
-              Validation.byProvider(HibernateValidator.class)
-                      .configure()
-                      .buildValidatorFactory()
-                      .getValidator()
-                      .unwrap(MethodValidator.class));
-    if (failedValidations.size() > 0) {
-      throw new ConfigurationValidationException(failedValidations);
+    ExecutableValidator validator;
+    try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+      validator = factory.getValidator().forExecutables();
+    }
+
+    Set<ConstraintViolation<T>> violations = validate(iface, blueprint, validator);
+    if (! violations.isEmpty()) {
+      throw new ConstraintViolationException(violations);
     }
 
     return blueprint;
@@ -64,19 +64,18 @@ public class ValidatedBlueprint {
    *
    * @param iface
    * @param blueprint
-   * @param methodValidator
+   * @param validator
    * @param <T>
    * @return
-   * @throws ConfigurationValidationException if the configuration fails to validate against
+   * @throws ConstraintViolationException if the configuration fails to validate against
    * {@code javax.validation.constraints.*} annotations present of {@code iface}'s methods.
    */
-  private static <T> List<String> validate(Class<T> iface, T blueprint, MethodValidator methodValidator)
-          throws ConfigurationValidationException {
-    LinkedList<String> failedValidations = new LinkedList<String>();
+  private static <T> Set<ConstraintViolation<T>> validate(Class<T> iface, T blueprint, ExecutableValidator validator)
+          throws ConstraintViolationException {
+    Set<ConstraintViolation<T>> violations = new HashSet<>();
     try {
       for (Method ifaceMethod : iface.getMethods()) {
-        //FIXME why query the blueprint instance again?  I forgot.  Need to check.
-        // get the method
+        //FIXME why query the blueprint instance again? Check this.
         Method method = blueprint.getClass().getMethod(
                 ifaceMethod.getName(),
                 ifaceMethod.getParameterTypes());
@@ -92,15 +91,12 @@ public class ValidatedBlueprint {
             value = method.invoke(blueprint, NULL_HINT);
           }
 
-          final Set<MethodConstraintViolation<T>> violations =
-                  methodValidator.validateReturnValue(blueprint, method, value);
-          for (MethodConstraintViolation<T> violation : violations) {
-            failedValidations.add(violation.getMessage());
-          }
+          Set<ConstraintViolation<T>> vs = validator.validateReturnValue(blueprint, method, value);
+          violations.addAll(vs);
         }
       }
 
-      return failedValidations;
+      return violations;
 
     } catch (Exception e) {
       /* all other exceptions indicate bugs in Blueprint */

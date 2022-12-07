@@ -44,8 +44,7 @@ public class BlueprintTest {
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
-  public void rejectsClasses()
-          throws ConfigurationValidationException {
+  public void rejectsClasses() {
     Blueprint.create(Class.class, TEST_NODE);
   }
 

@@ -20,23 +20,10 @@
     <groupId>org.codemined</groupId>
     <artifactId>blueprint</artifactId>
     <version>0.3-SNAPSHOT</version>
+
     <dependencies>
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>4.3.2.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.13</version>
-        </dependency>
     </dependencies>
+
     <packaging>pom</packaging>
     <name>Blueprint</name>
     <description>Type-safe configuration framework for Java</description>
